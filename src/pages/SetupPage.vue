@@ -1,64 +1,56 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useQuasar } from 'quasar'
+// components
+import ServerAddress from 'components/setupPage/serverAddr.vue'
+import DeviceId from 'components/setupPage/deviceId.vue'
+import MediaFolder from 'components/setupPage/mediaFolder.vue'
 
-const address = ref('127.0.0.1')
+const $q = useQuasar()
+
+const address = ref('')
 const uid = ref('')
 const mediafolder = ref('')
 
+// lifecycle hook
 onMounted(() => {
-  myAPI.data((args) => {
-    console.log(args)
-    switch (args.key) {
-      case 'serveraddress':
-        address.value = args.value
-        break
-      case 'deviceId':
-        uid.value = args.value
-        break
-      case 'mediafolder':
-        mediafolder.value = args.value
-        break
+  ipc.on('db:rt', (args) => {
+    if (args && args.key) {
+      switch (args.key) {
+        case 'serveraddress':
+          address.value = args.value
+          break
+        case 'deviceid':
+          uid.value = args.value
+          break
+        case 'mediafolder':
+          mediafolder.value = args.value
+          break
+      }
     }
   })
-  myAPI.command({ command: 'getServerAddress' })
-  myAPI.command({ command: 'getDeviceId' })
-  myAPI.command({ command: 'getMediaFolder' })
+})
+
+onBeforeUnmount(() => {
+  ipc.removeEventListener('db:rt')
 })
 </script>
 
 <template>
   <div class="q-pa-md">
-    <div class="bg-grey-2 border-round q-pa-md">
+    <div class="bg-grey-1 border-round q-pa-md">
       <!-- server ip address -->
-      <div class="row justify-between items-center">
-        <div class="text-bold font-sans">Server Address</div>
-        <div class="row items-center">
-          <div class="font-sans">{{ address }}</div>
-          <q-btn round flat size="sm" icon="edit" color="primary"></q-btn>
-        </div>
-      </div>
+      <ServerAddress :address="address" />
       <!-- uuid -->
-      <div class="row justify-between items-center">
-        <div class="text-bold font-sans">Device ID</div>
-        <div class="row items-center">
-          <div class="font-sans">{{ uid }}</div>
-          <q-btn round flat size="sm" icon="refresh" color="primary"></q-btn>
-        </div>
-      </div>
+      <DeviceId :uid="uid" />
       <!-- media folder -->
-      <div class="row justify-between items-center">
-        <div class="text-bold font-sans">Default Media Folder</div>
-        <div class="row items-center">
-          <div class="font-sans">{{ uid }}</div>
-          <q-btn round flat size="sm" icon="refresh" color="primary"></q-btn>
-        </div>
-      </div>
+      <MediaFolder :mediafolder="mediafolder" />
     </div>
   </div>
 </template>
 
 <style scoped>
 .border-round {
-  border-radius: 0.7rem;
+  border-radius: 0.5rem;
 }
 </style>

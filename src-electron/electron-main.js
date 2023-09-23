@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import path from 'path'
 import os from 'os'
 
-import db from './db'
+import initIPC from './ipc'
 
 let mainWindow
 
@@ -11,10 +11,12 @@ function createWindow() {
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
     width: 1000,
     height: 600,
+    x: 100,
+    y: 100,
     useContentSize: true,
     webPreferences: {
       contextIsolation: true,
-      sandbox: false,
+      // sandbox: false,
       preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD)
     }
   })
@@ -33,7 +35,8 @@ function createWindow() {
     mainWindow = null
   })
 
-  import('./ipc')
+  // start IPC
+  initIPC()
 }
 
 app.whenReady().then(createWindow)
