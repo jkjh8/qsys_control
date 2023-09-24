@@ -1,3 +1,13 @@
+<script setup>
+import { onMounted } from 'vue'
+import useSocket from 'src/composables/useSocket.js'
+
+onMounted(() => {
+  useSocket()
+  ipc.send('socket:start')
+})
+</script>
+
 <template>
   <router-view />
 </template>

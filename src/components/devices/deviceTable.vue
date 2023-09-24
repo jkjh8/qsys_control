@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useDeviceStore } from 'src/stores/devices.js'
 import columns from './columns.js'
 
-const rows = ref([])
+const { deivces } = storeToRefs(useDeviceStore())
 
 onMounted(() => {
   ipc.on('devices:rt', (args) => {
-    rows.value = args
+    devices.value = args
   })
   ipc.send('devices:list')
 })
@@ -14,7 +16,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <q-table :columns="columns" :rows="rows">
+    <q-table :columns="columns" :rows="devices">
       <template #body="props">
         <q-tr :props="props">
           <q-td key="name" :props="props">
