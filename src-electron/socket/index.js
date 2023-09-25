@@ -2,6 +2,7 @@ import { io } from 'socket.io-client'
 import logger from 'src-electron/logger'
 import db from 'src-electron/db'
 import { rtIPC } from 'src-electron/ipc'
+import dataProcess from './dataProcess'
 
 let socket
 
@@ -34,6 +35,11 @@ async function socketConnect() {
     })
 
     socket.on('data', (data) => {
+      try {
+        dataProcess(data)
+      } catch (err) {
+        logger.error(`socket.io data error -- ${data}`)
+      }
       console.log(`socket.io on data -- ${data}`)
     })
 

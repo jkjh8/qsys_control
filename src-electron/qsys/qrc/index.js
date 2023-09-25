@@ -24,6 +24,24 @@ export default class Qrc extends EventEmitter {
       // socket keep alive
       this.setTimeout()
     })
+
+    this.client.on('close', () => {
+      this.connected = false
+      clearInterval(this.ivConnection)
+      logger.warn(`qsys ${this.name} - ${this.ipaddress} disconnected`)
+    })
+
+    this.client.on('timeout', () => {
+      logger.warn(`qsys ${this.name} - ${this.ipaddress} connection timeout`)
+    })
+
+    this.client.on('error', (err) => {
+      logger.error(`qsys ${this.name} - ${this.ipaddress} error -- ${err}`)
+    })
+
+    this.client.on('data', (data) => {
+      // TODO: data process
+    })
   }
 
   connect() {
