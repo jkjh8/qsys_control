@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client'
 import logger from 'src-electron/logger'
 import db from 'src-electron/db'
+import { rtIPC } from 'src-electron/ipc'
 
 let socket
 
@@ -16,15 +17,17 @@ async function socketConnect() {
       transports: ['websocket'],
       withCredentials: true,
       rejectUnauthorized: false,
-      extraHeaders: { deviceId: uid.value, type: 'qsys' },
+      extraHeaders: { deviceid: uid.value, type: 'qsys' },
       autoConnect: true
     })
 
     socket.on('connect', () => {
+      rtIPC('socket:rt', { name: 'online', value: true })
       logger.info(`socket.io connected to ${addr.value} socket -- ${socket.id}`)
     })
 
     socket.on('disconnect', () => {
+      rtIPC('socket:rt', { name: 'online', value: false })
       logger.warn(
         `socket.io disconnected from ${addr.value} socket -- ${socket.id}`
       )

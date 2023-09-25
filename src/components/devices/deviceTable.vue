@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useDeviceStore } from 'src/stores/devices.js'
 import columns from './columns.js'
 
-const { deivces } = storeToRefs(useDeviceStore())
+const { devices } = storeToRefs(useDeviceStore())
 
 onMounted(() => {
   ipc.on('devices:rt', (args) => {
