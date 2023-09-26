@@ -8,12 +8,8 @@ const qsysData = {}
 let id = 1000
 
 function getId() {
-  if (id < 2000) {
-    id = id + 1
-  } else {
-    id = 1001
-  }
-  return id
+  if (id < 2000) return (id = id + 1)
+  return (id = 1001)
 }
 
 function qsysParser(data) {
