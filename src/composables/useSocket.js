@@ -7,6 +7,7 @@ export default function () {
   const { devices } = storeToRefs(useDeviceStore())
 
   ipc.on('socket:rt', (obj) => {
+    console.log(obj)
     const { name, value } = obj
     switch (name) {
       case 'online':

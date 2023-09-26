@@ -6,48 +6,38 @@ import dataProcess from './dataProcess'
 
 let socket
 
-async function socketConnect() {
+async function socketConnect(addr, uid) {
   try {
-    const addr = await db.findOne({ key: 'serveraddress' })
-    if (!addr) return logger.error('server address not found')
-
-    const uid = await db.findOne({ key: 'deviceid' })
-    if (!uid) return logger.error('device id not found')
-
-    socket = io(`http://${addr.value}/qsys`, {
+    socket = io(`http://${addr}/qsys`, {
       transports: ['websocket'],
       withCredentials: true,
       rejectUnauthorized: false,
-      extraHeaders: { deviceid: uid.value, type: 'qsys' },
+      extraHeaders: { deviceid: uid, type: 'qsys' },
       autoConnect: true
     })
 
     socket.on('connect', () => {
       rtIPC('socket:rt', { name: 'online', value: true })
-      logger.info(`socket.io connected to ${addr.value} socket -- ${socket.id}`)
+      logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
     })
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
       rtIPC('socket:rt', { name: 'online', value: false })
-      logger.warn(
-        `socket.io disconnected from ${addr.value} socket -- ${socket.id}`
-      )
+      logger.warn(`socket.io disconnected from ${addr} socket -- ${reason}`)
     })
 
     socket.on('data', (data) => {
       try {
-        dataProcess(data)
+        dataProcess(JSON.parse(data))
       } catch (err) {
         logger.error(`socket.io data error -- ${data}`)
       }
-      console.log(`socket.io on data -- ${data}`)
     })
 
-    logger.info(`socket.io start on -- ${addr.value} - ${uid.value}`)
+    logger.info(`socket.io start on -- ${addr} - ${uid}`)
   } catch (err) {
     logger.error(`socket connection error -- ${err}`)
   }
 }
 
-export default socket
-export { socketConnect }
+export { socket, socketConnect }

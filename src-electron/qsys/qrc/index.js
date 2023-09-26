@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events'
 import net from 'net'
-import logger from 'src-electron/logger'
+import { removeQsys } from '..'
 
 export default class Qrc extends EventEmitter {
   constructor(obj) {
     super()
-    this.name = obj.name
+    this.name = `${obj.name} - ${obj.ipaddress}`
     // tcp socket
     this.ipaddress = obj.ipaddress
     this.client = new net.Socket()
@@ -16,11 +16,12 @@ export default class Qrc extends EventEmitter {
     this.commands = []
     this.ivCommands = null
     // data
-    this.data = Buiffer.alloc(0)
+    this.data = Buffer.alloc(0)
 
     // events
     this.client.on('connect', () => {
       this.connected = true
+      this.emit('connect')
       // socket keep alive
       this.setTimeout()
     })
@@ -28,34 +29,40 @@ export default class Qrc extends EventEmitter {
     this.client.on('close', () => {
       this.connected = false
       clearInterval(this.ivConnection)
-      logger.warn(`qsys ${this.name} - ${this.ipaddress} disconnected`)
+      removeQsys(obj)
+      this.emit('disconnect')
     })
 
     this.client.on('timeout', () => {
-      logger.warn(`qsys ${this.name} - ${this.ipaddress} connection timeout`)
+      this.emit('error', `qsys ${this.name} connection timeout`)
     })
 
     this.client.on('error', (err) => {
-      logger.error(`qsys ${this.name} - ${this.ipaddress} error -- ${err}`)
+      this.emit('error', `qsys ${this.name} error -- ${err}`)
     })
 
     this.client.on('data', (data) => {
       // TODO: data process
+      try {
+        this.data = Buffer.concat([this.data, data])
+        if (data.includes('\x00')) {
+          this.emit('data', this.data.toString().trim().split('\x00'))
+          this.data = Buffer.alloc(0)
+        }
+      } catch (err) {
+        this.emit('error', `qsys ${this.name} data receive error -- ${err}`)
+      }
     })
   }
 
   connect() {
     if (this.connected) {
-      return logger.warn(
-        `qsys ${this.name} - ${this.ipaddress} is already connected`
-      )
+      return this.emit('error', `qsys ${this.name} is already connected`)
     }
     try {
       this.client.connect({ port: 1710, host: this.ipaddress })
     } catch (err) {
-      logger.error(
-        `qsys ${this.name} - ${this.ipaddress} connect error -- ${err}`
-      )
+      this.emit('error', `qsys ${this.name} connect error -- ${err}`)
     }
   }
 
@@ -71,7 +78,7 @@ export default class Qrc extends EventEmitter {
     }
   }
 
-  addConnand(msg) {
+  addCommand(msg) {
     this.commands.push(msg)
     if (!this.ivCommands) {
       this.commandProcess()
@@ -80,8 +87,10 @@ export default class Qrc extends EventEmitter {
 
   commandProcess() {
     this.ivCommands = setInterval(() => {
-      if (this.commands.length) {
-        this.send(this.commands.shift())
+      if (this.commands.length > 0) {
+        if (this.connected) {
+          this.send(this.commands.shift())
+        }
       } else {
         clearInterval(this.ivCommands)
         this.ivCommands = null
@@ -97,33 +106,42 @@ export default class Qrc extends EventEmitter {
           ...msg
         }) + '\x00'
       )
+      this.timeout = 60
     } else {
-      logger.warn(
-        `qsys ${this.name} - ${this.ipaddress} send data failed -- socket not connected command: ${msg}`
+      this.emit(
+        'error',
+        `qsys ${this.name} send data failed -- socket not connected command: ${msg}`
       )
     }
   }
 
-  setTimout() {
+  setTimeout() {
     if (this.ivConnection) {
-      return logger.info(
-        `qsys ${this.name} - ${this.ipaddress} set connection timeout failed -- timeout interval is alive`
+      return this.emit(
+        'error',
+        `qsys ${this.name} set connection timeout failed -- timeout interval is alive`
       )
     } else {
-      this.ivConnection = setInterval(() => {
-        this.timeout = this.timeout - 1
-        if (this.timeout < 5) {
-          this.addCommand({ method: 'NoOp', params: {} })
-          this.timeout = 60
-        }
-        // clear interval at disconnected
-        if (!this.connected) {
-          clearInterval(this.ivConnection)
-          this.ivConnection = null
-          this.timeout = 60
-          logger.warn = `qsys ${this.name} - ${this.ipaddress} clear interval -- socket not connected`
-        }
-      })
+      try {
+        this.ivConnection = setInterval(() => {
+          this.timeout = this.timeout - 1
+          if (this.timeout < 5) {
+            this.addCommand({ method: 'NoOp', params: {} })
+            console.log('noop')
+          }
+          // clear interval at disconnected
+          if (!this.connected) {
+            clearInterval(this.ivConnection)
+            this.ivConnection = null
+            this.emit(
+              'error',
+              `qsys ${this.name} clear interval -- socket not connected`
+            )
+          }
+        }, 1000)
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 }
