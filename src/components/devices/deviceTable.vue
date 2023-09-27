@@ -20,7 +20,10 @@ onMounted(() => {
       <template #body="props">
         <q-tr :props="props">
           <q-td key="name" :props="props">
-            {{ props.row.name }}
+            <div>
+              <q-badge rounded :color="props.row.connected ? 'green' : 'red'" />
+              {{ props.row.name }}
+            </div>
           </q-td>
           <q-td key="deviceId" :props="props">
             {{ props.row.deviceId }}
