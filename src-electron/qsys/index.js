@@ -44,11 +44,12 @@ function addQsys(devices) {
       // on data
       qsys[deviceId].on('data', (arr) => {
         console.log(`on data ${deviceId}`)
-        arr.forEach((device) => {
-          if (device) {
-            qsysParser(deviceId, JSON.parse(device))
-          }
-        })
+        qsysParser(deviceId, arr)
+        // arr.forEach((device) => {
+        //   if (device) {
+        //     qsysParser(deviceId, JSON.parse(device))
+        //   }
+        // })
       })
       qsys[deviceId].on('error', (err) => {
         logger.error(err)
