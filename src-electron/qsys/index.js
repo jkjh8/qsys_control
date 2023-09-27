@@ -1,6 +1,8 @@
 import Qrc from './qrc'
 import logger from '../logger'
 import { socket } from '../socket'
+import qsysParser from './parser'
+import { getPaGainMute } from './commands'
 
 const qsys = {}
 const qsysData = {}
@@ -10,10 +12,6 @@ let id = 1000
 function getId() {
   if (id < 2000) return (id = id + 1)
   return (id = 1001)
-}
-
-function qsysParser(data) {
-  console.log(data)
 }
 
 function addQsys(devices) {
@@ -30,6 +28,13 @@ function addQsys(devices) {
         socket.emit('data', { command: 'connect', value: device })
 
         setPaFeedback(device)
+        setTimeout(() => {
+          try {
+            getPaGainMute(device.deviceId)
+          } catch (error) {
+            console.log(error)
+          }
+        }, 1000)
       })
       qsys[deviceId].on('disconnect', () => {
         // send socket
@@ -38,9 +43,10 @@ function addQsys(devices) {
       })
       // on data
       qsys[deviceId].on('data', (arr) => {
+        console.log(`on data ${deviceId}`)
         arr.forEach((device) => {
           if (device) {
-            qsysParser(JSON.parse(device))
+            qsysParser(deviceId, JSON.parse(device))
           }
         })
       })
