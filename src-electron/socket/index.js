@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client'
 import logger from 'src-electron/logger'
-import db from 'src-electron/db'
 import { rtIPC } from 'src-electron/ipc'
 import dataProcess from './dataProcess'
+import { qsysData } from 'src-electron/qsys'
 
 let socket
 
@@ -18,6 +18,7 @@ async function socketConnect(addr, uid) {
 
     socket.on('connect', () => {
       rtIPC('socket:rt', { name: 'online', value: true })
+      socket.emit('qsys:data', JSON.stringify(qsysData))
       logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
     })
 

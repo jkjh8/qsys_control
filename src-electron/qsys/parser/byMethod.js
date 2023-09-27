@@ -4,7 +4,8 @@ export default function (id, method, params) {
   const obj = qsysData[id]
   switch (method) {
     case 'EngineStatus':
-      Object.assign(obj, params)
+      obj.status = params
+      // Object.assign(obj, params)
       break
     case 'PA.ZoneStatus':
       if (Object.keys(obj).includes('zones') === false) {
