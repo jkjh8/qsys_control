@@ -8,33 +8,37 @@ let socket
 
 async function socketConnect(addr, uid) {
   try {
-    socket = io(`http://${addr}/qsys`, {
+    socket = io(`http://${addr}`, {
       transports: ['websocket'],
-      withCredentials: true,
       rejectUnauthorized: false,
+      withCredentials: true,
+      auth: {
+        token: uid
+      },
       extraHeaders: { deviceid: uid, type: 'qsys' },
       autoConnect: true
     })
 
     socket.on('connect', () => {
       rtIPC('socket:rt', { name: 'online', value: true })
-      socket.emit('qsys:data', JSON.stringify(qsysData))
+      socket.emit('qsys:devices', JSON.stringify(qsysData))
       logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
     })
 
     socket.on('disconnect', (reason) => {
       rtIPC('socket:rt', { name: 'online', value: false })
       logger.warn(`socket.io disconnected from ${addr} socket -- ${reason}`)
+      socket.connect()
     })
 
-    socket.on('data', (data) => {
+    socket.on('qsys:data', (data) => {
       try {
         dataProcess(JSON.parse(data))
       } catch (err) {
         logger.error(`socket.io data error -- ${data}`)
       }
     })
-
+    socket.connect()
     logger.info(`socket.io start on -- ${addr} - ${uid}`)
   } catch (err) {
     logger.error(`socket connection error -- ${err}`)
