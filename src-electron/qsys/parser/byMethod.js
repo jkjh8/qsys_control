@@ -1,27 +1,28 @@
-import { qsysData } from '..'
+import { socket } from 'src-electron/socket'
+import logger from 'src-electron/logger'
 
-export default function (id, method, params) {
-  const obj = qsysData[id]
+export default function (deviceId, method, params) {
   switch (method) {
     case 'EngineStatus':
-      obj.status = params
-      // Object.assign(obj, params)
+      socket.emit(
+        'qsys:data',
+        JSON.stringify({ deviceId: deviceId, key: 'status', data: params })
+      )
       break
     case 'PA.ZoneStatus':
-      if (Object.keys(obj).includes('zones') === false) {
-        obj.zones = {}
-      }
-      if (Object.keys(obj.zones).includes(params.Zone.toString()) === false) {
-        obj.zones[params.Zone] = {}
+      const obj = {}
+      if (Object.keys(obj).includes(params.Zone.toString()) === false) {
+        obj[params.Zone] = {}
       }
 
       for (let key in params) {
         if (key !== 'Zone') {
-          obj.zones[params.Zone][key] = params[key]
+          obj[params.Zone][key] = params[key]
         }
       }
+      return { key: 'zones', data: obj }
       break
     default:
-      console.log('parse method default', method, params)
+      logger.warn(`parse method default ${method}, ${params}`)
   }
 }

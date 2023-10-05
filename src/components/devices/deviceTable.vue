@@ -6,6 +6,9 @@ import columns from './columns.js'
 
 const { devices } = storeToRefs(useDeviceStore())
 
+function qsysRefresh(id) {
+  ipc.send('qsys:refresh', { deviceId: id })
+}
 onMounted(() => {
   ipc.on('devices:rt', (args) => {
     devices.value = args
@@ -38,6 +41,15 @@ onMounted(() => {
             <div class="caption">{{ props.row.deviceType.model }}</div>
           </q-td>
           <q-td key="actions" :props="props">
+            <div>
+              <q-btn
+                round
+                flat
+                icon="refresh"
+                color="primary"
+                @click="qsysRefresh(props.row.deviceId)"
+              />
+            </div>
             <!-- <div>
               <q-btn
                 round

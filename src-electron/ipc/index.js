@@ -3,11 +3,13 @@ import logger from 'src-electron/logger'
 import dbFunc from './dbFunc'
 import dialogFunc from './dialogFunc'
 import socketFunc from './socketFunc'
+import qsysFunc from './qsysFunc'
 
 export default function () {
   dbFunc()
   dialogFunc()
   socketFunc()
+  qsysFunc()
 }
 
 function rtIPC(channel, obj) {

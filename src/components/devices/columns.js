@@ -26,10 +26,10 @@ export default [
     align: 'center',
     field: 'deviceType',
     sortable: true
+  },
+  {
+    name: 'actions',
+    label: 'Actions',
+    align: 'center'
   }
-  // {
-  //   name: 'actions',
-  //   label: 'Actions',
-  //   align: 'center'
-  // }
 ]

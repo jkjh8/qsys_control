@@ -1,5 +1,4 @@
-import { BrowserWindow } from 'electron'
-import { qsysData } from '..'
+import { getPaGainMute } from '../commands'
 import byMethod from './byMethod'
 import byId from './byId'
 import { socket } from 'src-electron/socket'
@@ -9,23 +8,29 @@ id
 
 */
 
-export default function (id, rt) {
-  // id keys check
-  if (Object.keys(qsysData).includes(id) === false) {
-    qsysData[id] = {}
-  }
+export default function (deviceId, rt) {
+  let zones = {}
   for (let val of rt) {
     if (val) {
       const data = JSON.parse(val)
-
+      // by method
       if (Object.keys(data).includes('method')) {
-        byMethod(id, data.method, data.params)
+        const r = byMethod(deviceId, data.method, data.params)
+        if (r && r.key === 'zones') {
+          zones = { ...zones, ...r.data }
+        }
       }
+      // by id
       if (Object.keys(data).includes('id')) {
-        byId(id, data)
+        byId(deviceId, data)
       }
     }
   }
-  BrowserWindow.fromId(1).webContents.send('qsys:data', qsysData)
-  socket.emit('qsys:data', JSON.stringify(qsysData))
+  if (Object.keys(zones).length > 0) {
+    socket.emit(
+      'qsys:data',
+      JSON.stringify({ deviceId, key: 'zones', data: zones })
+    )
+    getPaGainMute(deviceId, zones)
+  }
 }

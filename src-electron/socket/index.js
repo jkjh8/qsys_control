@@ -28,7 +28,9 @@ async function socketConnect(addr, uid) {
     socket.on('disconnect', (reason) => {
       rtIPC('socket:rt', { name: 'online', value: false })
       logger.warn(`socket.io disconnected from ${addr} socket -- ${reason}`)
-      socket.connect()
+      setTimeout(() => {
+        socket.connect()
+      }, 5000)
     })
 
     socket.on('qsys:data', (data) => {

@@ -2,7 +2,7 @@ import Qrc from './qrc'
 import logger from '../logger'
 import { socket } from '../socket'
 import qsysParser from './parser'
-import { getPaGainMute } from './commands'
+import { getPaGainMute, setPaFeedback } from './commands'
 
 const qsys = {}
 const qsysData = {}
@@ -27,10 +27,10 @@ function addQsys(devices) {
         logger.info(`qsys ${name} - ${ipaddress} connected`)
         socket.emit('data', { command: 'connect', value: device })
 
-        setPaFeedback(device)
+        setPaFeedback(device.deviceId)
         setTimeout(() => {
           try {
-            getPaGainMute(device.deviceId)
+            // getPaGainMute(device.deviceId)
           } catch (error) {
             console.log(error)
           }
@@ -75,19 +75,19 @@ function removeQsys(device) {
 }
 
 // code 2000, set Pa feed back
-function setPaFeedback(device, value = true) {
-  try {
-    qsys[device.deviceId].addCommand({
-      id: 2000,
-      method: 'PA.ZoneStatusConfigure',
-      params: { Enabled: value }
-    })
-  } catch (err) {
-    logger.error(
-      `qsys ${device.name} - ${device.ipaddress} set PA feedback error -- ${err}`
-    )
-  }
-}
+// function setPaFeedback(device, value = true) {
+//   try {
+//     qsys[device.deviceId].addCommand({
+//       id: 2000,
+//       method: 'PA.ZoneStatusConfigure',
+//       params: { Enabled: value }
+//     })
+//   } catch (err) {
+//     logger.error(
+//       `qsys ${device.name} - ${device.ipaddress} set PA feedback error -- ${err}`
+//     )
+//   }
+// }
 
 function defaultPlay(device, obj) {
   const { deviceId, name, ipaddress } = device
