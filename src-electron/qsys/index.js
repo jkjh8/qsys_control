@@ -45,11 +45,6 @@ function addQsys(devices) {
       qsys[deviceId].on('data', (arr) => {
         console.log(`on data ${deviceId}`)
         qsysParser(deviceId, arr)
-        // arr.forEach((device) => {
-        //   if (device) {
-        //     qsysParser(deviceId, JSON.parse(device))
-        //   }
-        // })
       })
       qsys[deviceId].on('error', (err) => {
         logger.error(err)
@@ -73,21 +68,6 @@ function removeQsys(device) {
     )
   }
 }
-
-// code 2000, set Pa feed back
-// function setPaFeedback(device, value = true) {
-//   try {
-//     qsys[device.deviceId].addCommand({
-//       id: 2000,
-//       method: 'PA.ZoneStatusConfigure',
-//       params: { Enabled: value }
-//     })
-//   } catch (err) {
-//     logger.error(
-//       `qsys ${device.name} - ${device.ipaddress} set PA feedback error -- ${err}`
-//     )
-//   }
-// }
 
 function defaultPlay(device, obj) {
   const { deviceId, name, ipaddress } = device
