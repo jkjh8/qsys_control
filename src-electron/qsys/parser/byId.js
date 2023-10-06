@@ -1,22 +1,16 @@
 import { socket } from 'src-electron/socket'
-
+import { qsys } from '..'
 export default function (deviceId, data) {
   const { id, result } = data
   switch (id) {
     // 2000 set pa feedback
     case 2000:
-      socket.emit(
-        'qsys:data',
-        JSON.stringify({
-          deviceId,
-          key: 'ZoneStatusConfigure',
-          data: data.result
-        })
-      )
+      qsys[deviceId].ZoneStatusConfigure = result
       break
     // 3001 gain and mute
     case 3001:
       const arr = result.Controls
+      console.log(arr)
       let gain = {}
       let mute = {}
       for (let control of arr) {

@@ -2,6 +2,7 @@ import { getPaGainMute } from '../commands'
 import byMethod from './byMethod'
 import byId from './byId'
 import { socket } from 'src-electron/socket'
+import { qsys } from '..'
 /*
 id
 3001 = get pa gain mute all
@@ -15,10 +16,7 @@ export default function (deviceId, rt) {
       const data = JSON.parse(val)
       // by method
       if (Object.keys(data).includes('method')) {
-        const r = byMethod(deviceId, data.method, data.params)
-        if (r && r.key === 'zones') {
-          zones = { ...zones, ...r.data }
-        }
+        byMethod(deviceId, data.method, data.params)
       }
       // by id
       if (Object.keys(data).includes('id')) {
@@ -26,11 +24,14 @@ export default function (deviceId, rt) {
       }
     }
   }
-  if (Object.keys(zones).length > 0) {
-    socket.emit(
-      'qsys:data',
-      JSON.stringify({ deviceId, key: 'zones', data: zones })
-    )
-    getPaGainMute(deviceId, zones)
-  }
+  socket.emit(
+    'qsys:data',
+    JSON.stringify({
+      deviceId,
+      status: qsys[deviceId].status,
+      zones: qsys[deviceId].zones,
+      ZoneStatusConfigure: qsys[deviceId].ZoneStatusConfigure
+    })
+  )
+  // getPaGainMute(deviceId, zones)
 }
