@@ -4,7 +4,8 @@ import logger from 'src-electron/logger'
 import {
   getPaConfig,
   getStatus,
-  setPaFeedback
+  setPaFeedback,
+  getPaGainMute
 } from 'src-electron/qsys/commands'
 
 export default function () {
@@ -12,7 +13,7 @@ export default function () {
     const { deviceId } = device
     try {
       console.log(deviceId)
-      // getPaGainMute(deviceId)
+      getPaGainMute(deviceId)
       getStatus(deviceId)
       setPaFeedback(deviceId)
       getPaConfig(deviceId)

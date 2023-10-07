@@ -26,7 +26,12 @@ function addQsys(devices) {
         // send socket
         logger.info(`qsys ${name} - ${ipaddress} connected`)
         socket.emit('data', { command: 'connect', value: device })
-
+        // data init
+        qsysData[deviceId] = {
+          status: {},
+          zones: {},
+          connected: true
+        }
         setPaFeedback(device.deviceId)
         setTimeout(() => {
           try {
@@ -40,6 +45,10 @@ function addQsys(devices) {
         // send socket
         socket.emit('data', { command: 'disconnect', value: device })
         logger.warn(`qsys ${name} - ${ipaddress} disconnected`)
+        setTimeout(() => {
+          logger.warn(`qsys ${name} - ${ipaddress} reconnect`)
+          qsys[deviceId].connect()
+        }, 5000)
       })
       // on data
       qsys[deviceId].on('data', (arr) => {
@@ -49,11 +58,9 @@ function addQsys(devices) {
       qsys[deviceId].on('error', (err) => {
         logger.error(err)
       })
-      qsys[device.deviceId].connect()
+      qsys[deviceId].connect()
     } catch (err) {
-      logger.error(
-        `qsys ${device.name} - ${device.ipaddress} add error -- ${err}`
-      )
+      logger.error(`qsys ${name} - ${ipaddress} add error -- ${err}`)
     }
   })
 }

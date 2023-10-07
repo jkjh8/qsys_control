@@ -42,11 +42,20 @@ export default class Qrc extends EventEmitter {
     })
 
     this.client.on('data', (data) => {
-      // TODO: data process
       try {
         this.data = Buffer.concat([this.data, data])
         if (data.includes('\x00')) {
-          this.emit('data', this.data.toString().trim().split('\x00'))
+          const _data = this.data
+            .toString()
+            .trim()
+            .split('\x00')
+            .filter((element) => {
+              return element !== undefined && element !== null && element !== ''
+            })
+            .map((el) => JSON.parse(el))
+          // emit data
+          this.emit('data', _data)
+          // reset buffer
           this.data = Buffer.alloc(0)
         }
       } catch (err) {
