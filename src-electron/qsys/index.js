@@ -28,8 +28,10 @@ function addQsys(devices) {
         socket.emit('data', { command: 'connect', value: device })
         // data init
         qsysData[deviceId] = {
-          status: {},
-          zones: {},
+          EngineStatus: {},
+          ZoneStatus: {},
+          PageStatus: {},
+          PaConfig: {},
           connected: true
         }
         setPaFeedback(device.deviceId)
@@ -76,85 +78,85 @@ function removeQsys(device) {
   }
 }
 
-function defaultPlay(device, obj) {
-  const { deviceId, name, ipaddress } = device
-  try {
-    // TODO: if need relay on code?
-    const {
-      mode,
-      zones,
-      station,
-      priority,
-      description,
-      preamble,
-      cancelDelay,
-      queueTimeout
-    } = obj
-    // default set command
-    const command = {
-      id: 2001,
-      Mode: mode ? mode : 'auto',
-      Zones: zones,
-      Station: station ? station : 1,
-      Priority: priority ? priority : 3,
-      QueueTimeout: queueTimeout ? queueTimeout : 240,
-      CancelDelay: cancelDelay ? cancelDelay : 0
-    }
-    // add description
-    if (description) {
-      command.description = description
-    }
-    // add preamble
-    if (preamble) {
-      command.preamble = preamble
-    }
-    // add command to qsys
-    qsys[deviceId].addCommand(command)
-  } catch (err) {
-    logger.error(`qsys ${name} - ${ipaddress} message play error -- ${err}`)
-  }
-}
+// function defaultPlay(device, obj) {
+//   const { deviceId, name, ipaddress } = device
+//   try {
+//     // TODO: if need relay on code?
+//     const {
+//       mode,
+//       zones,
+//       station,
+//       priority,
+//       description,
+//       preamble,
+//       cancelDelay,
+//       queueTimeout
+//     } = obj
+//     // default set command
+//     const command = {
+//       id: 2001,
+//       Mode: mode ? mode : 'auto',
+//       Zones: zones,
+//       Station: station ? station : 1,
+//       Priority: priority ? priority : 3,
+//       QueueTimeout: queueTimeout ? queueTimeout : 240,
+//       CancelDelay: cancelDelay ? cancelDelay : 0
+//     }
+//     // add description
+//     if (description) {
+//       command.description = description
+//     }
+//     // add preamble
+//     if (preamble) {
+//       command.preamble = preamble
+//     }
+//     // add command to qsys
+//     qsys[deviceId].addCommand(command)
+//   } catch (err) {
+//     logger.error(`qsys ${name} - ${ipaddress} message play error -- ${err}`)
+//   }
+// }
 
 // code 2001, message play
-function messagePlay(device, obj) {
-  const { deviceId, name, ipaddress } = device
-  try {
-    // TODO: if need relay on code?
-    const {
-      zones,
-      priority,
-      message,
-      messageDelete,
-      description,
-      preamble,
-      cancelDelay,
-      queueTimeout
-    } = obj
-    // default set command
-    const command = {
-      id: 2001,
-      Mode: 'message',
-      Zones: zones,
-      Priority: priority,
-      Message: message,
-      MessageDelete: messageDelete ? messageDelete : false,
-      QueueTimeout: queueTimeout ? queueTimeout : 0,
-      CancelDelay: cancelDelay ? cancelDelay : 0
-    }
-    // add description
-    if (description) {
-      command.description = description
-    }
-    // add preamble
-    if (preamble) {
-      command.preamble = preamble
-    }
-    // add command to qsys
-    qsys[deviceId].addCommand(command)
-  } catch (err) {
-    logger.error(`qsys ${name} - ${ipaddress} message play error -- ${err}`)
-  }
-}
+// function messagePlay(device, obj) {
+//   const { deviceId, name, ipaddress } = device
+//   try {
+//     // TODO: if need relay on code?
+//     const {
+//       zones,
+//       priority,
+//       message,
+//       messageDelete,
+//       description,
+//       preamble,
+//       cancelDelay,
+//       queueTimeout
+//     } = obj
+//     // default set command
+//     const command = {
+//       id: 2001,
+//       Mode: 'message',
+//       Zones: zones,
+//       Priority: priority,
+//       Message: message,
+//       MessageDelete: messageDelete ? messageDelete : false,
+//       QueueTimeout: queueTimeout ? queueTimeout : 0,
+//       CancelDelay: cancelDelay ? cancelDelay : 0
+//     }
+//     // add description
+//     if (description) {
+//       command.description = description
+//     }
+//     // add preamble
+//     if (preamble) {
+//       command.preamble = preamble
+//     }
+//     // add command to qsys
+//     qsys[deviceId].addCommand(command)
+//   } catch (err) {
+//     logger.error(`qsys ${name} - ${ipaddress} message play error -- ${err}`)
+//   }
+// }
 function qsysCommand(device, method, params) {
   const { deviceId, name, ipaddress } = device
   try {
@@ -168,13 +170,4 @@ function qsysCommand(device, method, params) {
   }
 }
 
-export {
-  qsys,
-  qsysData,
-  addQsys,
-  removeQsys,
-  setPaFeedback,
-  messagePlay,
-  defaultPlay,
-  qsysCommand
-}
+export { qsys, qsysData, addQsys, removeQsys, setPaFeedback, qsysCommand }

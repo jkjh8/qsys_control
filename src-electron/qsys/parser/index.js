@@ -18,10 +18,10 @@ export default function (deviceId, data) {
       const { method, params } = obj
       switch (method) {
         case 'EngineStatus':
-          qsysData[deviceId].status = params
+          qsysData[deviceId].EngineStatus = params
           break
         case 'PA.ZoneStatus':
-          const zones = qsysData[deviceId].zones
+          const zones = qsysData[deviceId].ZoneStatus
           if (Object.keys(zones).includes(params.Zone.toString()) === false) {
             zones[params.Zone] = {}
           }
@@ -40,10 +40,10 @@ export default function (deviceId, data) {
       switch (id) {
         // 1000 get device status
         case 1000:
-          qsysData[deviceId].status = result
+          qsysData[deviceId].EngineStatus = result
           socket.emit(
             'qsys:data',
-            JSON.stringify({ deviceId, key: 'status', value: result })
+            JSON.stringify({ deviceId, key: 'EngineStatus', value: result })
           )
           break
         // 2000 set pa feedback
@@ -61,9 +61,10 @@ export default function (deviceId, data) {
         //2001 get pa configure
         case 2001:
           // TODO: add qsysData ???
+          qsysData[deviceId].PaConfig = result
           socket.emit(
             'qsys:data',
-            JSON.stringify({ deviceId, key: 'PaConfigure', value: result })
+            JSON.stringify({ deviceId, key: 'PaConfig', value: result })
           )
           break
         // 3001 get gain and mute
@@ -72,11 +73,10 @@ export default function (deviceId, data) {
           for (let control of arr) {
             const channel = control.Name.replace(/[^0-9]/g, '')
             if (control.Name.includes('gain')) {
-              console.log(control)
-              qsysData[deviceId].zones[channel].gain = control.Value
+              qsysData[deviceId].ZoneStatus[channel].gain = control.Value
             }
             if (control.Name.includes('mute')) {
-              qsysData[deviceId].zones[channel].mute = control.Value
+              qsysData[deviceId].ZoneStatus[channel].mute = control.Value
             }
           }
           socket.emit(
@@ -84,7 +84,7 @@ export default function (deviceId, data) {
             JSON.stringify({
               deviceId,
               key: 'GainAndMute',
-              value: qsysData[deviceId].zones
+              value: qsysData[deviceId].ZoneStatus
             })
           )
       }
@@ -97,8 +97,8 @@ export default function (deviceId, data) {
       JSON.stringify({
         key: 'RtByMethod',
         deviceId,
-        status: qsysData[deviceId].status,
-        zones: qsysData[deviceId].zones
+        EngineStatus: qsysData[deviceId].EngineStatus,
+        ZoneStatus: qsysData[deviceId].ZoneStatus
       })
     )
   }
