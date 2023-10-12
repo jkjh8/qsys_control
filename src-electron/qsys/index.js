@@ -7,69 +7,94 @@ import { getPaGainMute, setPaFeedback } from './commands'
 const qsys = {}
 const qsysData = {}
 
-let id = 1000
-
-function getId() {
-  if (id < 2000) return (id = id + 1)
-  return (id = 1001)
-}
-
 function addQsys(devices) {
   devices.forEach((device) => {
-    const { deviceId, name, ipaddress } = device
-    // obj exists check
-    if (qsys[deviceId]) return
-    // function connect
-    try {
-      qsys[deviceId] = new Qrc(device)
-      qsys[deviceId].on('connect', () => {
-        // send socket
-        logger.info(`qsys ${name} - ${ipaddress} connected`)
-        socket.emit('data', { command: 'connect', value: device })
-        // data init
-        qsysData[deviceId] = {
-          EngineStatus: {},
-          ZoneStatus: {},
-          PageStatus: {},
-          PaConfig: {},
-          connected: true
-        }
-        setPaFeedback(device.deviceId)
-        setTimeout(() => {
-          try {
-            // getPaGainMute(device.deviceId)
-          } catch (error) {
-            console.log(error)
-          }
-        }, 1000)
-      })
-      qsys[deviceId].on('disconnect', () => {
-        // send socket
-        socket.emit('data', { command: 'disconnect', value: device })
-        logger.warn(`qsys ${name} - ${ipaddress} disconnected`)
-        setTimeout(() => {
-          logger.warn(`qsys ${name} - ${ipaddress} reconnect`)
-          qsys[deviceId].connect()
-        }, 5000)
-      })
-      // on data
-      qsys[deviceId].on('data', (arr) => {
-        console.log(`on data ${deviceId}`)
-        qsysParser(deviceId, arr)
-      })
-      qsys[deviceId].on('error', (err) => {
-        logger.error(err)
-      })
-      qsys[deviceId].connect()
-    } catch (err) {
-      logger.error(`qsys ${name} - ${ipaddress} add error -- ${err}`)
+    if (
+      qsys[device.deviceId] === null ||
+      qsys[device.deviceId] === undefined ||
+      qsys[device.deviceId].connected === false
+    ) {
+      addQsysDevice(device)
     }
   })
+}
+
+function addQsysDevice(device) {
+  try {
+    const { deviceId, name, ipaddress } = device
+    if (qsys[deviceId] && qsys[deviceId].connected)
+      return logger.warn(`qsys device ${name} ${deviceId} exists`)
+    qsys[deviceId] = new Qrc(device)
+
+    qsys[deviceId].on('connect', () => {
+      logger.info(`qsys ${name} - ${ipaddress} - ${deviceId} connected!`)
+      socket.emit(
+        'qsys',
+        JSON.stringify({
+          key: 'connect',
+          deviceId,
+          name,
+          ipaddress,
+          value: 'OK'
+        })
+      )
+      initQsysData(deviceId)
+    })
+
+    qsys[deviceId].on('disconnect', () => {
+      logger.warn(`qsys ${name} - ${ipaddress} disconnected`)
+      socket.emit(
+        'qsys',
+        JSON.stringify({
+          key: 'disconnect',
+          deviceId,
+          name,
+          ipaddress,
+          value: 'OK'
+        })
+      )
+      reconnectDevice(device)
+    })
+
+    qsys[deviceId].on('data', (arr) => {
+      logger.info(`qsys data on ${name} ${ipaddress} ${deviceId}`)
+      qsysParser(deviceId, arr)
+    })
+
+    qsys[deviceId].on('error', (err) => {
+      logger.error(`qsys error on ${name} ${ipaddress} ${deviceId} -- ${err}`)
+    })
+    qsys[deviceId].connect()
+  } catch (err) {
+    logger.error(`qsys device add error -- ${err}`)
+  }
+}
+
+function reconnectDevice(device) {
+  setTimeout(() => {
+    addQsysDevice(device)
+  }, 10000)
+}
+
+function initQsysData(deviceId) {
+  qsysData[deviceId] = {
+    EngineStatus: {},
+    ZoneStatus: {},
+    PageStatus: {},
+    PaConfig: {},
+    PageID: null,
+    ZoneStatusConfigure: false
+  }
+
+  setTimeout(() => {
+    setPaFeedback(deviceId)
+  }, 1000)
 }
 
 function removeQsys(device) {
   try {
     delete qsys[device.deviceId]
+    delete qsysData[device.deviceId]
     logger.warn(`qsys ${device.name} - ${device.ipaddress} removed`)
   } catch (err) {
     logger.error(
@@ -78,96 +103,4 @@ function removeQsys(device) {
   }
 }
 
-// function defaultPlay(device, obj) {
-//   const { deviceId, name, ipaddress } = device
-//   try {
-//     // TODO: if need relay on code?
-//     const {
-//       mode,
-//       zones,
-//       station,
-//       priority,
-//       description,
-//       preamble,
-//       cancelDelay,
-//       queueTimeout
-//     } = obj
-//     // default set command
-//     const command = {
-//       id: 2001,
-//       Mode: mode ? mode : 'auto',
-//       Zones: zones,
-//       Station: station ? station : 1,
-//       Priority: priority ? priority : 3,
-//       QueueTimeout: queueTimeout ? queueTimeout : 240,
-//       CancelDelay: cancelDelay ? cancelDelay : 0
-//     }
-//     // add description
-//     if (description) {
-//       command.description = description
-//     }
-//     // add preamble
-//     if (preamble) {
-//       command.preamble = preamble
-//     }
-//     // add command to qsys
-//     qsys[deviceId].addCommand(command)
-//   } catch (err) {
-//     logger.error(`qsys ${name} - ${ipaddress} message play error -- ${err}`)
-//   }
-// }
-
-// code 2001, message play
-// function messagePlay(device, obj) {
-//   const { deviceId, name, ipaddress } = device
-//   try {
-//     // TODO: if need relay on code?
-//     const {
-//       zones,
-//       priority,
-//       message,
-//       messageDelete,
-//       description,
-//       preamble,
-//       cancelDelay,
-//       queueTimeout
-//     } = obj
-//     // default set command
-//     const command = {
-//       id: 2001,
-//       Mode: 'message',
-//       Zones: zones,
-//       Priority: priority,
-//       Message: message,
-//       MessageDelete: messageDelete ? messageDelete : false,
-//       QueueTimeout: queueTimeout ? queueTimeout : 0,
-//       CancelDelay: cancelDelay ? cancelDelay : 0
-//     }
-//     // add description
-//     if (description) {
-//       command.description = description
-//     }
-//     // add preamble
-//     if (preamble) {
-//       command.preamble = preamble
-//     }
-//     // add command to qsys
-//     qsys[deviceId].addCommand(command)
-//   } catch (err) {
-//     logger.error(`qsys ${name} - ${ipaddress} message play error -- ${err}`)
-//   }
-// }
-function qsysCommand(device, method, params) {
-  const { deviceId, name, ipaddress } = device
-  try {
-    qsys[deviceId].addCommand({
-      id: getId(),
-      method,
-      params
-    })
-  } catch (err) {
-    logger.error(`qsys ${name} - ${ipaddress} command error -- ${err}`)
-  }
-}
-
-export { qsys, qsysData, addQsys, removeQsys, setPaFeedback, qsysCommand }
+export { qsys, qsysData, addQsys }

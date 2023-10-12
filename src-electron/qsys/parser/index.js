@@ -4,7 +4,14 @@ import { qsys, qsysData } from '..'
 id
 2000 = ZoneStatusConfigure
 2001 = get pa configure
-2000 =
+2000 = set Pa Feedback
+2001 = get pa config
+2002 = message page
+2003 = live page
+
+2008 = stop page
+2009 = cancel page
+
 3001 = get pa gain mute all
 
 */
@@ -65,6 +72,42 @@ export default function (deviceId, data) {
           socket.emit(
             'qsys:data',
             JSON.stringify({ deviceId, key: 'PaConfig', value: result })
+          )
+          break
+        // 2002 page message
+        case 2002:
+          qsysData[deviceId].PageID = result.PageID
+          socket.emit(
+            'qsys:data',
+            JSON.stringify({
+              key: 'page:message',
+              value: result
+            })
+          )
+          break
+        // 2003 live page
+        case 2003:
+          qsysData[deviceId].PageID = result.PageID
+          socket.emit(
+            'qsys:data',
+            JSON.stringify({
+              key: 'page:live',
+              value: result
+            })
+          )
+          break
+        // 2008 page stop
+        case 2008:
+          socket.emit(
+            'qsys:data',
+            JSON.stringify({ key: 'page:stop', value: result })
+          )
+          break
+        // 2008 page stop
+        case 2009:
+          socket.emit(
+            'qsys:data',
+            JSON.stringify({ key: 'page:cancel', value: result })
           )
           break
         // 3001 get gain and mute

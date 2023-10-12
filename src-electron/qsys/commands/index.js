@@ -54,30 +54,85 @@ function getPaConfig(deviceId) {
 // 2002
 function messagePlay(deviceId, obj) {
   try {
-    const command = {
-      id: 2002,
+    const params = {
       Mode: 'message',
-      Zones: obj.zones,
-      Priority: obj.priority,
-      Message: obj.message,
-      MessageDelete: obj.messageDelete ? obj.messageDelete : false,
-      QueueTimeout: obj.queueTimeout ? obj.queueTimeout : 0,
-      CancelDelay: obj.cancelDelay ? obj.cancelDelay : 0
+      Zones: obj.Zones,
+      Priority: obj.Priority,
+      Message: obj.Message,
+      MessageDelete: obj.MessageDelete ? obj.MessageDelete : false,
+      QueueTimeout: obj.QueueTimeout ? obj.QueueTimeout : 0,
+      CancelDelay: obj.CancelDelay ? obj.CancelDelay : 0
     }
 
-    if (obj.description) {
-      command.description = description
+    if (obj.Description) {
+      params.Description = Description
     }
 
-    if (obj.preamble) {
-      command.preamble = obj.preamble
+    if (obj.Preamble) {
+      params.Preamble = obj.Preamble
     }
 
-    qsys[deviceId].addCommand(command)
+    qsys[deviceId].addCommand({ id: 2002, method: 'PA.PageSubmit', params })
   } catch (err) {
-    logger.error(`qsys id ${deviceId} default play error: ${err}`)
+    logger.error(`qsys id ${deviceId} message page error: ${err}`)
   }
 }
 
+// 2003
+function livePage(deviceId, obj) {
+  try {
+    const params = {
+      Zones: obj.Zones,
+      MaxPageTime: obj.MaxPageTime ? obj.MaxPageTime : 240,
+      Mode: 'live',
+      Station: 1,
+      Priority: obj.Priority ? obj.Priority : 3,
+      Start: true
+    }
+    if (obj.Description) {
+      params.Description = Description
+    }
+    if (obj.Preamble) {
+      params.Preamble = obj.Preamble
+    }
+
+    qsys[deviceId].addCommand({ id: 2003, method: 'PA.PageSubmit', params })
+  } catch (err) {
+    logger.error(`qsys id ${deviceId} live page error ${err}`)
+  }
+}
+// 2008
+function stopPage(deviceId, PageID) {
+  try {
+    qsys[deviceId].addCommand({
+      id: 2009,
+      method: 'PA.PageStop',
+      params: { PageID }
+    })
+  } catch (err) {
+    logger.error(`qsys id ${deviceId} page stop error ${err}`)
+  }
+}
+// 2009
+function cancelPage(deviceId, PageID) {
+  try {
+    qsys[deviceId].addCommand({
+      id: 2009,
+      method: 'PA.PageCancel',
+      params: { PageID }
+    })
+  } catch (err) {
+    logger.error(`qsys id ${deviceId} page cancel error ${err}`)
+  }
+}
 // function setPaFeedback(deviceId) {}
-export { getPaGainMute, setPaFeedback, getStatus, getPaConfig, messagePlay }
+export {
+  getPaGainMute,
+  setPaFeedback,
+  getStatus,
+  getPaConfig,
+  messagePlay,
+  livePage,
+  stopPage,
+  cancelPage
+}

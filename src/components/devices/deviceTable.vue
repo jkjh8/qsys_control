@@ -9,6 +9,10 @@ const { devices } = storeToRefs(useDeviceStore())
 function qsysRefresh(id) {
   ipc.send('qsys:refresh', { deviceId: id })
 }
+
+function reloadDevices() {
+  ipc.send('socket:devices')
+}
 onMounted(() => {
   ipc.on('devices:rt', (args) => {
     devices.value = args
@@ -19,6 +23,9 @@ onMounted(() => {
 
 <template>
   <div>
+    <div>
+      <q-btn round flat color="primary" icon="refresh" @click="reloadDevices" />
+    </div>
     <q-table :columns="columns" :rows="devices">
       <template #body="props">
         <q-tr :props="props">

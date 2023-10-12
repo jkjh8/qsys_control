@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client'
 import logger from 'src-electron/logger'
 import { rtIPC } from 'src-electron/ipc'
-import dataProcess from './dataProcess'
-import { qsysData } from 'src-electron/qsys'
+import { addQsys } from 'src-electron/qsys'
+import { updateDevices } from 'src-electron/devices'
 
 let socket
 
@@ -21,7 +21,6 @@ async function socketConnect(addr, uid) {
 
     socket.on('connect', () => {
       rtIPC('socket:rt', { name: 'online', value: true })
-      socket.emit('qsys:devices', JSON.stringify(qsysData))
       logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
     })
 
@@ -35,12 +34,22 @@ async function socketConnect(addr, uid) {
 
     socket.on('qsys:data', (data) => {
       try {
-        dataProcess(JSON.parse(data))
+        const obj = JSON.parse(data)
+        switch (obj.key) {
+          case 'connect':
+            updateDevices(obj.value)
+            rtIPC('socket:rt', { name: 'devices', value: obj.value })
+            addQsys(obj.value)
+            break
+          case 'devices':
+            updateDevices(obj.value)
+            rtIPC('socket:rt', { name: 'devices', value: obj.value })
+            break
+        }
       } catch (err) {
-        logger.error(`socket.io data error -- ${data}`)
+        logger.error(`socket.io data error -- ${err}`)
       }
     })
-    socket.connect()
     logger.info(`socket.io start on -- ${addr} - ${uid}`)
   } catch (err) {
     logger.error(`socket connection error -- ${err}`)

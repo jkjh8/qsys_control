@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import net from 'net'
-import { removeQsys } from '..'
+import { socket } from '../../socket'
+// import { removeQsys } from '..'
 
 export default class Qrc extends EventEmitter {
   constructor(obj) {
@@ -20,6 +21,7 @@ export default class Qrc extends EventEmitter {
 
     // events
     this.client.on('connect', () => {
+      console.log('tryconnect')
       this.connected = true
       this.emit('connect')
       // socket keep alive
@@ -29,7 +31,7 @@ export default class Qrc extends EventEmitter {
     this.client.on('close', () => {
       this.connected = false
       clearInterval(this.ivConnection)
-      removeQsys(obj)
+      this.client.removeAllListeners()
       this.emit('disconnect')
     })
 
@@ -38,7 +40,8 @@ export default class Qrc extends EventEmitter {
     })
 
     this.client.on('error', (err) => {
-      this.emit('error', `qsys ${this.name} error -- ${err}`)
+      this.client.end()
+      this.emit('error', err)
     })
 
     this.client.on('data', (data) => {

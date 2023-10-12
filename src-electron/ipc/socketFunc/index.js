@@ -17,4 +17,9 @@ export default function () {
       logger.error(`IPC socket connect error -- ${err}`)
     }
   })
+
+  ipcMain.on('socket:devices', () => {
+    console.log('get devices')
+    socket.emit('bridge', JSON.stringify({ key: 'getDevices', type: 'qsys' }))
+  })
 }
