@@ -43,10 +43,10 @@ onMounted(() => {
               props.row.ipaddress
             }}</a>
           </q-td>
-          <q-td key="deviceType" :props="props">
+          <!-- <q-td key="deviceType" :props="props">
             <div>{{ props.row.deviceType.deviceType }}</div>
             <div class="caption">{{ props.row.deviceType.model }}</div>
-          </q-td>
+          </q-td> -->
           <q-td key="actions" :props="props">
             <div>
               <q-btn

@@ -73,7 +73,7 @@ function addQsysDevice(device) {
 function reconnectDevice(device) {
   setTimeout(() => {
     addQsysDevice(device)
-  }, 10000)
+  }, 60000)
 }
 
 function initQsysData(deviceId) {

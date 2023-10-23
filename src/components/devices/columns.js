@@ -20,13 +20,13 @@ export default [
     field: 'ipaddress',
     sortable: true
   },
-  {
-    name: 'deviceType',
-    label: 'Type',
-    align: 'center',
-    field: 'deviceType',
-    sortable: true
-  },
+  // {
+  //   name: 'deviceType',
+  //   label: 'Type',
+  //   align: 'center',
+  //   field: 'deviceType',
+  //   sortable: true
+  // },
   {
     name: 'actions',
     label: 'Actions',
