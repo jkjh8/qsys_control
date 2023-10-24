@@ -28,6 +28,7 @@ export default function (deviceId, data) {
           qsysData[deviceId].EngineStatus = params
           break
         case 'PA.ZoneStatus':
+          // TODO: zone data object to array change!!!
           const zones = qsysData[deviceId].ZoneStatus
           if (Object.keys(zones).includes(params.Zone.toString()) === false) {
             zones[params.Zone] = {}
