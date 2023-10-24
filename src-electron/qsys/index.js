@@ -91,11 +91,13 @@ function reconnectDevice(device) {
 function initQsysData(deviceId) {
   qsysData[deviceId] = {
     EngineStatus: {},
-    ZoneStatus: {},
     PageStatus: {},
     PaConfig: {},
     PageID: null,
     ZoneStatusConfigure: false
+  }
+  if (!Object.keys(qsysData[deviceId]).includes('ZoneStatus')) {
+    qsysData[deviceId].ZoneStatus = []
   }
 
   setTimeout(() => {

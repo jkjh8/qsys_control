@@ -19,10 +19,10 @@ function getStatus(deviceId) {
 // 3001
 function getPaGainMute(deviceId) {
   const arr = []
-  const keys = Object.keys(qsysData[deviceId].ZoneStatus)
-  for (let key of keys) {
-    arr.push({ Name: `zone.${key}.gain` })
-    arr.push({ Name: `zone.${key}.mute` })
+
+  for (let item of qsysData[deviceId].ZoneStatus) {
+    arr.push({ Name: `zone.${item.Zone}.gain` })
+    arr.push({ Name: `zone.${item.Zone}.mute` })
   }
   qsys[deviceId].addCommand({
     id: 3001,

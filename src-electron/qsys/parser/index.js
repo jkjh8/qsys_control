@@ -26,17 +26,18 @@ export default function (deviceId, data) {
       switch (method) {
         case 'EngineStatus':
           qsysData[deviceId].EngineStatus = params
+          sendSocket(deviceId, 'EnginStatus', { value: params })
           break
         case 'PA.ZoneStatus':
           // TODO: zone data object to array change!!!
-          const zones = qsysData[deviceId].ZoneStatus
-          if (Object.keys(zones).includes(params.Zone.toString()) === false) {
-            zones[params.Zone] = {}
-          }
-          for (let key in params) {
-            if (key !== 'Zone') {
-              zones[params.Zone][key] = params[key]
+          const ZoneStatus = qsysData[deviceId].ZoneStatus
+          let idx = ZoneStatus.findIndex((e) => e.Zone === params.Zone)
+          if (idx !== -1) {
+            for (let key in params) {
+              ZoneStatus[idx][key] = params[key]
             }
+          } else {
+            ZoneStatus.push(params)
           }
           rt = true
           break
@@ -84,26 +85,26 @@ export default function (deviceId, data) {
         // 3001 get gain and mute
         case 3001:
           const arr = result.Controls
+          const ZoneStatus = qsysData[deviceId].ZoneStatus
           for (let control of arr) {
-            const channel = control.Name.replace(/[^0-9]/g, '')
+            const channel = Number(control.Name.replace(/[^0-9]/g, ''))
             if (control.Name.includes('gain')) {
-              qsysData[deviceId].ZoneStatus[channel].gain = control.Value
+              let idx = ZoneStatus.findIndex((e) => e.Zone === channel)
+              ZoneStatus[idx].gain = control.Value
             }
             if (control.Name.includes('mute')) {
-              qsysData[deviceId].ZoneStatus[channel].mute = control.Value
+              let idx = ZoneStatus.findIndex((e) => e.Zone === channel)
+              ZoneStatus[idx].mute = control.Value
             }
           }
-          sendSocket(deviceId, 'GainAndMute', {
-            ZoneStatus: qsysData[deviceId].ZoneStatus
-          })
+          sendSocket(deviceId, 'GainAndMute', { ZoneStatus })
           break
       }
     }
   }
   // if rt true return socket to qsys data
   if (rt) {
-    sendSocket(deviceId, 'RtByMethod', {
-      EngineStatus: qsysData[deviceId].EngineStatus,
+    sendSocket(deviceId, 'ZoneStatus', {
       ZoneStatus: qsysData[deviceId].ZoneStatus
     })
   }
