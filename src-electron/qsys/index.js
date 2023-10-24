@@ -3,12 +3,13 @@ import logger from '../logger'
 import { socket } from '../socket'
 import qsysParser from './parser'
 import { getPaGainMute, setPaFeedback } from './commands'
+import { devices } from '../devices'
 
 const qsys = {}
 const qsysData = {}
 
-function addQsys(devices) {
-  devices.forEach((device) => {
+function addQsys(args) {
+  args.forEach((device) => {
     if (
       qsys[device.deviceId] === null ||
       qsys[device.deviceId] === undefined ||
@@ -17,6 +18,15 @@ function addQsys(devices) {
       addQsysDevice(device)
     }
   })
+
+  for (let item in qsys) {
+    if (args.findIndex((e) => e.deviceId === item) === -1) {
+      if (qsys[item].connected) {
+        qsys[item].disconnected()
+      }
+      delete qsys[item]
+    }
+  }
 }
 
 function addQsysDevice(device) {
@@ -72,7 +82,9 @@ function addQsysDevice(device) {
 
 function reconnectDevice(device) {
   setTimeout(() => {
-    addQsysDevice(device)
+    if (Object.keys(qsys).includes(device.deviceId)) {
+      addQsysDevice(device)
+    }
   }, 60000)
 }
 

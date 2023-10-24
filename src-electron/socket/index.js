@@ -44,6 +44,7 @@ async function socketConnect(addr, uid) {
           case 'devices':
             updateDevices(obj.value)
             rtIPC('socket:rt', { name: 'devices', value: obj.value })
+            addQsys(obj.value)
             break
         }
       } catch (err) {
