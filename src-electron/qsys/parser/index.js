@@ -26,7 +26,7 @@ export default function (deviceId, data) {
       switch (method) {
         case 'EngineStatus':
           qsysData[deviceId].EngineStatus = params
-          sendSocket(deviceId, 'EnginStatus', { value: params })
+          sendSocket(deviceId, 'EnginStatus', { EngineStatus: params })
           break
         case 'PA.ZoneStatus':
           // TODO: zone data object to array change!!!
@@ -51,7 +51,7 @@ export default function (deviceId, data) {
         // 1000 get device status
         case 1000:
           qsysData[deviceId].EngineStatus = result
-          sendSocket(deviceId, 'EngineStatus', { value: result })
+          sendSocket(deviceId, 'EngineStatus', { EngineStatus: result })
           break
         // 2000 set pa feedback
         case 2000:

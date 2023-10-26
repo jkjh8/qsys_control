@@ -32,17 +32,17 @@ async function socketConnect(addr, uid) {
       }, 5000)
     })
 
-    socket.on('qsys:data', (data) => {
+    socket.on('qsys:data', async (data) => {
       try {
         const obj = JSON.parse(data)
         switch (obj.key) {
           case 'connect':
-            updateDevices(obj.value)
+            await updateDevices(obj.value)
             rtIPC('socket:rt', { name: 'devices', value: obj.value })
             addQsys(obj.value)
             break
           case 'devices':
-            updateDevices(obj.value)
+            await updateDevices(obj.value)
             rtIPC('socket:rt', { name: 'devices', value: obj.value })
             addQsys(obj.value)
             break
