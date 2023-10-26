@@ -32,6 +32,10 @@ async function socketConnect(addr, uid) {
       }, 5000)
     })
 
+    socket.on('qsys:command', (comm) => {
+      console.log(comm)
+    })
+
     socket.on('qsys:data', async (data) => {
       try {
         const obj = JSON.parse(data)
