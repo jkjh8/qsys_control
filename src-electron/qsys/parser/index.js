@@ -1,5 +1,6 @@
 import { socket } from 'src-electron/socket'
 import { qsys, qsysData } from '..'
+import { getPaGainMute } from '../commands'
 /*
 id
 2000 = ZoneStatusConfigure
@@ -98,6 +99,12 @@ export default function (deviceId, data) {
             }
           }
           sendSocket(deviceId, 'GainAndMute', { ZoneStatus })
+          break
+        case 3002:
+        case 3003:
+          if (result) {
+            getPaGainMute(deviceId)
+          }
           break
       }
     }

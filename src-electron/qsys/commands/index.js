@@ -4,7 +4,8 @@ import logger from 'src-electron/logger'
 id
 2000 = set Pa feedback
 3001 = get pa gain mute all
-
+3002 = set channel mute
+3003 = set channel gain
 */
 
 // 1000
@@ -125,6 +126,41 @@ function cancelPage(deviceId, PageID) {
     logger.error(`qsys id ${deviceId} page cancel error ${err}`)
   }
 }
+
+// 3002
+function setChannelMute(deviceId, zone, value) {
+  try {
+    qsys[deviceId].addCommand({
+      id: 3002,
+      method: 'Component.Set',
+      params: {
+        Name: 'PA',
+        Controls: [{ Name: `zone.${zone}.mute`, Value: value }]
+      }
+    })
+    console.log('ccommand send')
+  } catch (err) {
+    logger.error(`qsys id ${deviceId} channel mute error ${err}`)
+  }
+}
+
+// 3003
+function setChannelGain(deviceId, zone, value) {
+  try {
+    qsys[deviceId].addCommand({
+      id: 3003,
+      method: 'Component.Set',
+      params: {
+        Name: 'PA',
+        Controls: [{ Name: `zone.${zone}.gain`, Value: value }]
+      }
+    })
+    console.log('ccommand send')
+  } catch (err) {
+    logger.error(`qsys id ${deviceId} channel gain change error ${err}`)
+  }
+}
+
 // function setPaFeedback(deviceId) {}
 export {
   getPaGainMute,
@@ -134,5 +170,7 @@ export {
   messagePlay,
   livePage,
   stopPage,
-  cancelPage
+  cancelPage,
+  setChannelMute,
+  setChannelGain
 }

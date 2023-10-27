@@ -3,6 +3,7 @@ import logger from 'src-electron/logger'
 import { rtIPC } from 'src-electron/ipc'
 import { addQsys } from 'src-electron/qsys'
 import { updateDevices } from 'src-electron/devices'
+import ioParser from './parser'
 
 let socket
 
@@ -34,6 +35,11 @@ async function socketConnect(addr, uid) {
 
     socket.on('qsys:command', (comm) => {
       console.log(comm)
+      try {
+        ioParser(JSON.parse(comm))
+      } catch (error) {
+        console.log(error)
+      }
     })
 
     socket.on('qsys:data', async (data) => {
