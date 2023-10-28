@@ -16,7 +16,7 @@ export default function () {
       getPaGainMute(deviceId)
       getStatus(deviceId)
       setPaFeedback(deviceId)
-      getPaConfig(deviceId)
+      // getPaConfig(deviceId)
     } catch (error) {
       console.log(error)
     }

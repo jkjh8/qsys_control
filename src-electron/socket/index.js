@@ -1,8 +1,7 @@
 import { io } from 'socket.io-client'
 import logger from 'src-electron/logger'
 import { rtIPC } from 'src-electron/ipc'
-import { addQsys } from 'src-electron/qsys'
-import { updateDevices } from 'src-electron/devices'
+import { updateDevice, updateDevices } from 'src-electron/qsys'
 import ioParser from './parser'
 
 let socket
@@ -22,6 +21,7 @@ async function socketConnect(addr, uid) {
 
     socket.on('connect', () => {
       rtIPC('socket:rt', { name: 'online', value: true })
+      // socket.emit('getQsysDevices')
       logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
     })
 
@@ -31,6 +31,17 @@ async function socketConnect(addr, uid) {
       setTimeout(() => {
         socket.connect()
       }, 5000)
+    })
+
+    socket.on('qsysDevices', (args) => {
+      const arr = JSON.parse(args)
+      updateDevices(arr)
+      rtIPC('socket:rt', { name: 'devices', value: arr })
+    })
+
+    socket.on('qsysUpdateDevice', (args) => {
+      const obj = JSON.parse(args)
+      updateDevice(obj)
     })
 
     socket.on('qsys:command', (comm) => {
@@ -47,14 +58,12 @@ async function socketConnect(addr, uid) {
         const obj = JSON.parse(data)
         switch (obj.key) {
           case 'connect':
-            await updateDevices(obj.value)
             rtIPC('socket:rt', { name: 'devices', value: obj.value })
-            addQsys(obj.value)
+            // addQsys(obj.value)
             break
           case 'devices':
-            await updateDevices(obj.value)
             rtIPC('socket:rt', { name: 'devices', value: obj.value })
-            addQsys(obj.value)
+            // addQsys(obj.value)
             break
         }
       } catch (err) {

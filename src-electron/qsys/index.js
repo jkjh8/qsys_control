@@ -3,20 +3,19 @@ import logger from '../logger'
 import { socket } from '../socket'
 import qsysParser from './parser'
 import { getPaGainMute, setPaFeedback } from './commands'
-import { devices } from '../devices'
 
 const qsys = {}
-const qsysData = {}
+let devices = {}
 
-function addQsys(args) {
+function addQsysDevices(args) {
   args.forEach((device) => {
-    if (
-      qsys[device.deviceId] === null ||
-      qsys[device.deviceId] === undefined ||
-      qsys[device.deviceId].connected === false
-    ) {
+    const { deviceId } = device
+    if (qsys[deviceId] === null || qsys[deviceId] === undefined) {
       addQsysDevice(device)
     }
+    // if (qsys[deviceId].connected === false) {
+    //   qsys[deviceId].connect()
+    // }
   })
 
   for (let item in qsys) {
@@ -89,17 +88,6 @@ function reconnectDevice(device) {
 }
 
 function initQsysData(deviceId) {
-  // qsysData[deviceId] = {
-  //   EngineStatus: {},
-  //   PageStatus: {},
-  //   PaConfig: {},
-  //   PageID: null,
-  //   ZoneStatusConfigure: false
-  // }
-  // if (!Object.keys(qsysData[deviceId]).includes('ZoneStatus')) {
-  //   qsysData[deviceId].ZoneStatus = []
-  // }
-
   setTimeout(() => {
     setPaFeedback(deviceId)
   }, 1000)
@@ -108,7 +96,7 @@ function initQsysData(deviceId) {
 function removeQsys(device) {
   try {
     delete qsys[device.deviceId]
-    delete qsysData[device.deviceId]
+    delete devices[device.deviceId]
     logger.warn(`qsys ${device.name} - ${device.ipaddress} removed`)
   } catch (err) {
     logger.error(
@@ -117,4 +105,12 @@ function removeQsys(device) {
   }
 }
 
-export { qsys, qsysData, addQsys }
+function updateDevices(args) {
+  devices = args
+  addQsysDevices(devices)
+}
+function updateDevice(args) {
+  const { deviceId } = args
+  devices[devices.findIndex((e) => e.deviceId === deviceId)] = args
+}
+export { qsys, devices, addQsysDevices, updateDevice, updateDevices }

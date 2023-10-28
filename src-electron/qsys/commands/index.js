@@ -1,4 +1,4 @@
-import { qsys, qsysData } from '..'
+import { qsys, devices } from '..'
 import logger from 'src-electron/logger'
 /*
 id
@@ -21,7 +21,8 @@ function getStatus(deviceId) {
 function getPaGainMute(deviceId) {
   const arr = []
 
-  for (let item of qsysData[deviceId].ZoneStatus) {
+  for (let item of devices[devices.findIndex((e) => e.deviceId === deviceId)]
+    .ZoneStatus) {
     arr.push({ Name: `zone.${item.Zone}.gain` })
     arr.push({ Name: `zone.${item.Zone}.mute` })
   }
