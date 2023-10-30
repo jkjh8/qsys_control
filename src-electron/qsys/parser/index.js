@@ -101,7 +101,7 @@ export default function (deviceId, data) {
           break
         case 3002:
         case 3003:
-          if (result) {
+          if (obj.error) {
             getPaGainMute(deviceId)
           }
           break
