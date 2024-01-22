@@ -4,6 +4,10 @@ import { useDialogPluginComponent } from 'quasar'
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
   useDialogPluginComponent()
+
+const props = defineProps({
+  serverAddr: String
+})
 const emit = defineEmits([...useDialogPluginComponent.emits])
 
 const current = ref('')
@@ -23,6 +27,7 @@ const current = ref('')
           dense
           filled
           label="Server Address"
+          :placeholder="props.serverAddr"
           @keyup.enter="onDialogOK(current)"
         ></q-input>
       </q-card-section>

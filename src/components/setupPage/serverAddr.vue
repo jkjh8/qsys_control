@@ -2,25 +2,34 @@
 import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import DialogAddr from 'src/components/dialog/dialogAddr.vue'
+
+import { storeToRefs } from 'pinia'
+import { useStatusStore } from '/src/stores/status.js'
+
+const { status } = storeToRefs(useStatusStore())
+
 // props
-const props = defineProps({
-  address: String
-})
+// const props = defineProps({
+//   address: String
+// })
 
 const $q = useQuasar()
 
 function openDialogAddr() {
   $q.dialog({
-    component: DialogAddr
+    component: DialogAddr,
+    componentProps: {
+      serverAddr: status.value.serverAddr
+    }
   }).onOk((str) => {
     if (str) {
-      ipc.send('db:update', { key: 'serveraddress', value: str })
+      ipc.send('db:update', { key: 'serverAddr', value: str })
     }
   })
 }
 
 onMounted(() => {
-  ipc.send('db:find', { key: 'serveraddress' })
+  ipc.send('status:get')
 })
 </script>
 
@@ -28,7 +37,7 @@ onMounted(() => {
   <div class="row justify-between items-center">
     <div class="text-bold font-sans">Server Address</div>
     <div class="row items-center q-gutter-x-sm">
-      <div class="font-sans">{{ address }}</div>
+      <div class="font-sans">{{ status.serverAddr }}</div>
       <q-btn
         round
         flat

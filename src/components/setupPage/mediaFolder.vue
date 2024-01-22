@@ -1,23 +1,23 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-// props
-const props = defineProps({
-  mediafolder: String
-})
+// store
+import { storeToRefs } from 'pinia'
+import { useStatusStore } from 'src/stores/status'
+const { status } = storeToRefs(useStatusStore())
 
 const $q = useQuasar()
 
 function openDialog() {
-  ipc.send('dialog:folder')
+  ipc.send('folder:set')
 }
 
 function openFolder() {
-  ipc.send('dialog:openFolder', props.mediafolder)
+  ipc.send('folder:open')
 }
 
 onMounted(() => {
-  ipc.send('db:find', { key: 'mediafolder' })
+  ipc.send('status:get')
 })
 </script>
 
@@ -25,9 +25,9 @@ onMounted(() => {
   <div class="row justify-between items-center">
     <div class="text-bold font-sans">Default Media Folder</div>
     <div class="row items-center q-gutter-x-sm">
-      <div class="font-sans cursor-pointer" @click="openFolder">
-        {{ mediafolder }}
-      </div>
+      <a class="font-sans cursor-pointer text-underline" @click="openFolder">
+        {{ status.mediafolder }}
+      </a>
       <q-btn
         round
         flat
@@ -40,4 +40,8 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.text-underline {
+  text-decoration: underline;
+}
+</style>

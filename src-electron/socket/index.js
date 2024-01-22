@@ -1,7 +1,8 @@
 import { io } from 'socket.io-client'
 import logger from 'src-electron/logger'
-import { rtIPC } from 'src-electron/ipc'
+import { rtIPC, rtStatus } from 'src-electron/ipc'
 import { updateDevice, updateDevices } from 'src-electron/qsys'
+import { Status } from 'src-electron/defaultVal'
 import ioParser from './parser'
 
 let socket
@@ -20,13 +21,17 @@ async function socketConnect(addr, uid) {
     })
 
     socket.on('connect', () => {
-      rtIPC('socket:rt', { name: 'online', value: true })
+      Status.connected = true
+      rtStatus()
+      // rtIPC('socket:rt', { name: 'online', value: true })
       // socket.emit('getQsysDevices')
       logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
     })
 
     socket.on('disconnect', (reason) => {
-      rtIPC('socket:rt', { name: 'online', value: false })
+      Status.connected = false
+      // rtIPC('socket:rt', { name: 'online', value: false })
+      rtStatus()
       logger.warn(`socket.io disconnected from ${addr} socket -- ${reason}`)
       setTimeout(() => {
         socket.connect()

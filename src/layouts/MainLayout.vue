@@ -3,10 +3,15 @@ import { ref, onMounted, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
-import { useOnlineStore } from '/src/stores/online.js'
+import { useStatusStore } from '/src/stores/status.js'
 
 const $r = useRouter()
-const { online } = storeToRefs(useOnlineStore())
+const { status } = storeToRefs(useStatusStore())
+const { initStatusRt } = useStatusStore()
+onBeforeMount(() => {
+  initStatusRt()
+  ipc.send('status:get')
+})
 </script>
 
 <template>
@@ -19,7 +24,9 @@ const { online } = storeToRefs(useOnlineStore())
         >
           <q-icon name="home" color="primary" size="sm" />
           <div class="font-ubuntumono font-md text-bold">Q-SYS Bridge</div>
-          <div class="online">{{ online ? 'Online' : 'Offline' }}</div>
+          <div class="online">
+            {{ status.connected ? 'Online' : 'Offline' }}
+          </div>
         </div>
         <div>
           <div class="btn cursor-pointer" @click="$r.push('/setup')">Setup</div>

@@ -2,11 +2,15 @@ import { app, BrowserWindow } from 'electron'
 import path from 'path'
 import os from 'os'
 
+import { initVal } from 'src-electron/functions/setValue'
 import initIPC from './ipc'
+import setDeviceId from 'src-electron/functions/deviceId'
+import { Status } from 'src-electron/defaultVal'
 
 let mainWindow
 
-function createWindow() {
+async function createWindow() {
+  await initVal()
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
     width: 1000,
@@ -35,6 +39,9 @@ function createWindow() {
     mainWindow = null
   })
 
+  if (Status.deviceId === '') {
+    await setDeviceId()
+  }
   // start IPC
   initIPC()
 }

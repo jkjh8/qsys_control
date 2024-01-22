@@ -1,11 +1,14 @@
 import { BrowserWindow } from 'electron'
+import { Status } from 'src-electron/defaultVal'
 import logger from 'src-electron/logger'
 import dbFunc from './dbFunc'
 import dialogFunc from './dialogFunc'
 import socketFunc from './socketFunc'
 import qsysFunc from './qsysFunc'
+import statusFunc from './statusFunc'
 
 export default function () {
+  statusFunc()
   dbFunc()
   dialogFunc()
   socketFunc()
@@ -22,4 +25,8 @@ function rtIPC(channel, obj) {
   }
 }
 
-export { rtIPC }
+function rtStatus() {
+  BrowserWindow.fromId(1).webContents.send('status', Status)
+}
+
+export { rtIPC, rtStatus }
