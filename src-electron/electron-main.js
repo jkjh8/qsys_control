@@ -2,15 +2,13 @@ import { app, BrowserWindow } from 'electron'
 import path from 'path'
 import os from 'os'
 
-import { initVal } from 'src-electron/functions/setValue'
 import initIPC from './ipc'
-import setDeviceId from 'src-electron/functions/deviceId'
-import { Status } from 'src-electron/defaultVal'
+import { setDefaultValueFormDb } from 'src-electron/defaultVal'
 
 let mainWindow
 
 async function createWindow() {
-  await initVal()
+  await setDefaultValueFormDb()
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
     width: 1000,
@@ -38,12 +36,10 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
-
-  if (Status.deviceId === '') {
-    await setDeviceId()
-  }
   // start IPC
   initIPC()
+  // tcp server open move ipc return function
+  // getTcpSocket(2990, '127.0.0.1')
 }
 
 app.whenReady().then(createWindow)

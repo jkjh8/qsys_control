@@ -7,10 +7,35 @@ import { useStatusStore } from '/src/stores/status.js'
 
 const $r = useRouter()
 const { status } = storeToRefs(useStatusStore())
-const { initStatusRt } = useStatusStore()
+
+const connected = ref(false)
+
 onBeforeMount(() => {
-  initStatusRt()
+  ipc.on('status:rt', (args) => {
+    for (let item in args) {
+      switch (item) {
+        case 'serverAddr':
+          status.value.serverAddr = args[item]
+          break
+        case 'serverPort':
+          status.value.serverPort = args[item]
+          break
+        case 'connected':
+          status.value.connected = args[item]
+          if (args[item]) {
+            connected.value = true
+          } else {
+            connected.value = false
+          }
+          break
+        case 'mediafolder':
+          status.value.mediafolder = args[item]
+          break
+      }
+    }
+  })
   ipc.send('status:get')
+  ipc.send('ui:open')
 })
 </script>
 
@@ -24,9 +49,7 @@ onBeforeMount(() => {
         >
           <q-icon name="home" color="primary" size="sm" />
           <div class="font-ubuntumono font-md text-bold">Q-SYS Bridge</div>
-          <div class="online">
-            {{ status.connected ? 'Online' : 'Offline' }}
-          </div>
+          <div class="online">Online</div>
         </div>
         <div>
           <div class="btn cursor-pointer" @click="$r.push('/setup')">Setup</div>
@@ -51,8 +74,8 @@ onBeforeMount(() => {
   background: #eee;
 }
 .online {
-  color: v-bind(online ? 'green': 'red');
-  border: 1px solid v-bind(online ? 'green': 'red');
+  color: v-bind(connected ? 'green': 'red');
+  border: 1px solid v-bind(connected ? 'green': 'red');
   border-radius: 5px;
   padding: 0 1px 0 1px;
   font-size: 10px;

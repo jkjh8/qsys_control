@@ -14,7 +14,7 @@ const props = defineProps({
 
 <template>
   <q-dialog ref="dialogRef">
-    <q-card class="q-dialog-plugin" style="border-radius: 6px">
+    <q-card class="q-dialog-plugin" style="border-radius: 8px">
       <q-card-section class="row no-wrap q-gutter-x-sm items-center">
         <q-icon name="check_circle" color="primary" size="sm"></q-icon>
         <div class="font-ubuntumono font-md text-bold">

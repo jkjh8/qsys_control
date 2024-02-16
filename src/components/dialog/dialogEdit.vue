@@ -1,34 +1,41 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
   useDialogPluginComponent()
 
 const props = defineProps({
-  serverAddr: String
+  name: String,
+  currentValue: String,
+  type: String,
+  label: String
 })
 const emit = defineEmits([...useDialogPluginComponent.emits])
 
-const current = ref('')
+const newValue = ref('')
+
+onMounted(() => {
+  newValue.value = props.currentValue
+})
 </script>
 
 <template>
   <q-dialog ref="dialogRef">
-    <q-card class="q-dialog-plugin" style="border-radius: 6px">
+    <q-card class="q-dialog-plugin" style="border-radius: 8px">
       <q-card-section class="row no-wrap q-gutter-x-sm items-center">
-        <q-icon name="edit" color="primary" size="sm"></q-icon>
-        <div class="font-ubuntumono font-md text-bold">Server address</div>
+        <div class="font-ubuntumono font-md text-bold">{{ name }}</div>
       </q-card-section>
       <q-card-section>
         <q-input
           class="q-mx-md"
-          v-model="current"
+          v-model="newValue"
           dense
           filled
-          label="Server Address"
-          :placeholder="props.serverAddr"
-          @keyup.enter="onDialogOK(current)"
+          :label="props.label"
+          :placeholder="newValue"
+          :type="props.type ?? String"
+          @keyup.enter="onDialogOK(newValue)"
         ></q-input>
       </q-card-section>
 
@@ -48,7 +55,7 @@ const current = ref('')
             unelevated
             no-caps
             color="primary"
-            @click="onDialogOK(current)"
+            @click="onDialogOK(newValue)"
           />
         </div>
       </q-card-actions>

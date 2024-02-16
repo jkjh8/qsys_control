@@ -1,17 +1,76 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow as bw, ipcMain, dialog, shell } from 'electron'
+import { getTcpSocket } from 'src-electron/tcp'
 import { Status } from 'src-electron/defaultVal'
 import logger from 'src-electron/logger'
-import dbFunc from './dbFunc'
-import dialogFunc from './dialogFunc'
-import socketFunc from './socketFunc'
 import qsysFunc from './qsysFunc'
-import statusFunc from './statusFunc'
 
 export default function () {
-  statusFunc()
-  dbFunc()
-  dialogFunc()
-  socketFunc()
+  // open ui
+  ipcMain.on('ui:open', () => {
+    getTcpSocket(Status.serverPort, Status.serverAddr)
+  })
+  // status rt
+  ipcMain.on('status:get', () =>
+    bw.fromId(1).webContents.send('status:rt', Status)
+  )
+
+  // folder functions
+  ipcMain.on('folder:set', async () => {
+    try {
+      const f = dialog.showOpenDialogSync({
+        title: '미디어 폴더를 선택하세요',
+        properties: ['openDirectory']
+      })
+      logger.info(
+        `media folder updated - ${await db.update(
+          { key: 'mediaFolder' },
+          { $set: { value: f[0] } },
+          { upsert: true }
+        )}`
+      )
+    } catch (error) {
+      logger.error(`Set Media folder error -- ${error}`)
+    }
+  })
+
+  ipcMain.on('folder:open', () => {
+    try {
+      shell.openPath(Status.mediafolder)
+    } catch (error) {
+      logger.error(`media folder open error -- ${error}`)
+    }
+  })
+
+  // db functions
+  ipcMain.on('db:find', async (_e, args) => {
+    try {
+      bw.fromId(1).webContents.send(
+        'db:rt',
+        await db.findOne({ key: args.key })
+      )
+    } catch (error) {
+      logger.error(`db find error -- ${error}`)
+    }
+  })
+
+  ipcMain.on('db:update', async (_e, args) => {
+    try {
+      const r = await db.update(
+        { key: args.key },
+        { $set: { value: args.value } },
+        { upsert: true }
+      )
+      if (r) {
+        bw.fromId(1).webContents.send(
+          'db:rt',
+          await db.findOne({ key: args.key })
+        )
+      }
+    } catch (error) {
+      logger.error(`db update error - ${error}`)
+    }
+  })
+
   qsysFunc()
 }
 

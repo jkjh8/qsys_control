@@ -15,10 +15,6 @@ function openDialog() {
 function openFolder() {
   ipc.send('folder:open')
 }
-
-onMounted(() => {
-  ipc.send('status:get')
-})
 </script>
 
 <template>

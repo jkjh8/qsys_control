@@ -1,15 +1,4 @@
-<script setup>
-import { onMounted } from 'vue'
-import useSocket from 'src/composables/useSocket.js'
-
-onMounted(() => {
-  useSocket()
-  ipc.on('qsys:data', (data) => {
-    console.log(data)
-  })
-  ipc.send('socket:start')
-})
-</script>
+<script setup></script>
 
 <template>
   <router-view />
