@@ -1,8 +1,8 @@
 import Qrc from './qrc'
 import logger from '../logger'
-import { socket } from '../socket'
-import qsysParser from './parser'
+import commands from './functions'
 import { getPaGainMute, setPaFeedback } from './commands'
+import { tcpSocketWrite } from '../tcp'
 
 const qsys = {}
 let devices = {}
@@ -37,37 +37,33 @@ function addQsysDevice(device) {
 
     qsys[deviceId].on('connect', () => {
       logger.info(`qsys ${name} - ${ipaddress} - ${deviceId} connected!`)
-      socket.emit(
-        'qsys',
-        JSON.stringify({
-          key: 'connect',
-          deviceId,
-          name,
-          ipaddress,
-          value: 'OK'
-        })
-      )
+      // qsys connect feedback
+      tcpSocketWrite({
+        comm: 'qsys:connect',
+        deviceId,
+        name,
+        ipaddress,
+        value: 'OK'
+      })
       initQsysData(deviceId)
     })
 
     qsys[deviceId].on('disconnect', () => {
       logger.warn(`qsys ${name} - ${ipaddress} disconnected`)
-      socket.emit(
-        'qsys',
-        JSON.stringify({
-          key: 'disconnect',
-          deviceId,
-          name,
-          ipaddress,
-          value: 'OK'
-        })
-      )
+      // qsys disconnect feedback
+      tcpSocketWrite({
+        comm: 'qsys:disconnect',
+        deviceId,
+        name,
+        ipaddress,
+        value: 'OK'
+      })
       reconnectDevice(device)
     })
 
     qsys[deviceId].on('data', (arr) => {
       logger.info(`qsys data on ${name} ${ipaddress} ${deviceId}`)
-      qsysParser(deviceId, arr)
+      commands(deviceId, arr)
     })
 
     qsys[deviceId].on('error', (err) => {

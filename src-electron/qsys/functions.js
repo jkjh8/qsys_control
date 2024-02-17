@@ -1,6 +1,6 @@
-import { socket } from 'src-electron/socket'
-import { qsys, devices } from '..'
-import { getPaGainMute } from '../commands'
+import { qsys, devices } from '.'
+import { getPaGainMute } from './commands'
+import { tcpSocketWrite } from 'src-electron/tcp'
 /*
 id
 2000 = ZoneStatusConfigure
@@ -27,7 +27,11 @@ export default function (deviceId, data) {
       switch (method) {
         case 'EngineStatus':
           // qsysData[deviceId].EngineStatus = params
-          sendSocket(deviceId, 'EnginStatus', { EngineStatus: params })
+          tcpSocketWrite({
+            comm: 'qsys:EnginStatus',
+            deviceId,
+            EngineStatus: params
+          })
           break
         case 'PA.ZoneStatus':
           // TODO: zone data object to array change!!!
@@ -53,32 +57,40 @@ export default function (deviceId, data) {
       switch (id) {
         // 1000 get device status
         case 1000:
-          sendSocket(deviceId, 'EngineStatus', { EngineStatus: result })
+          tcpSocketWrite({
+            deviceId,
+            comm: 'qsys:EngineStatus',
+            value: result
+          })
           break
         // 2000 set pa feedback
         case 2000:
-          sendSocket(deviceId, 'ZoneStatusConfigure', { value: result })
+          tcpSocketWrite({
+            deviceId,
+            comm: 'qsys:ZoneStatusConfigure',
+            value: result
+          })
           break
         //2001 get pa configure
         case 2001:
           // TODO: add qsysData ???
-          sendSocket(deviceId, 'PaConfig', { value: result })
+          tcpSocketWrite({ deviceId, comm: 'qsys:PaConfig', value: result })
           break
         // 2002 page message
         case 2002:
-          sendSocket(deviceId, 'page:message', result)
+          tcpSocketWrite({ deviceId, comm: 'qsys:page:message', value: result })
           break
         // 2003 live page
         case 2003:
-          sendSocket(deviceId, 'page:live', result)
+          tcpSocketWrite({ deviceId, comm: 'qsys:page:live', value: result })
           break
         // 2008 page stop
         case 2008:
-          sendSocket(deviceId, 'page:stop', { value: result })
+          tcpSocketWrite({ deviceId, comm: 'qsys:page:stop', value: result })
           break
         // 2008 page stop
         case 2009:
-          sendSocket(deviceId, 'page:cancel', { value: result })
+          tcpSocketWrite({ deviceId, comm: 'qsys:page:cancel', value: result })
           break
         // 3001 get gain and mute
         case 3001:
@@ -97,7 +109,11 @@ export default function (deviceId, data) {
               ZoneStatus[idx].mute = control.Value
             }
           }
-          sendSocket(deviceId, 'GainAndMute', { ZoneStatus })
+          tcpSocketWrite({
+            deviceId,
+            comm: 'qsys:GainAndMute',
+            value: ZoneStatus
+          })
           break
         case 3002:
         case 3003:
@@ -110,13 +126,11 @@ export default function (deviceId, data) {
   }
   // if rt true return socket to qsys data
   if (rt) {
-    sendSocket(deviceId, 'ZoneStatus', {
-      ZoneStatus:
+    tcpSocketWrite({
+      comm: 'qsys:ZoneStatus',
+      deviceId: deviceId,
+      value:
         devices[devices.findIndex((e) => e.deviceId === deviceId)].ZoneStatus
     })
   }
-}
-
-function sendSocket(deviceId, key, value) {
-  socket.emit('qsys', JSON.stringify({ key: key, deviceId, ...value }))
 }
