@@ -16,6 +16,7 @@ function reloadDevices() {
 onMounted(() => {
   ipc.on('devices:rt', (args) => {
     devices.value = args
+    console.log('updated devices: ' + args)
   })
   ipc.send('devices:list')
 })

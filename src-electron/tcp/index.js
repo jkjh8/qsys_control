@@ -2,6 +2,8 @@ import net from 'net'
 import { BrowserWindow as bw } from 'electron'
 import logger from 'src-electron/logger'
 import { Status } from 'src-electron/defaultVal'
+import functions from './functions'
+
 let tcpSocket = null
 
 function getTcpSocket(port, host) {
@@ -18,6 +20,9 @@ function getTcpSocket(port, host) {
 
   tcpSocket.on('data', (data) => {
     console.log('from tcp socket = ', data)
+    // for tcp commands
+    functions(data)
+    //
   })
 
   tcpSocket.on('close', () => {
