@@ -1,17 +1,14 @@
 <script setup>
 import { ref, onMounted, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
-
-import { useStatusStore } from '/src/stores/status.js'
 
 const $r = useRouter()
-const { status } = storeToRefs(useStatusStore())
-
-const connected = ref(false)
+import { status } from '/src/composables/useStatus.js'
+import { devices } from '/src/composables/useDevices.js'
 
 onBeforeMount(() => {
   ipc.on('status:rt', (args) => {
+    console.log('status:rt')
     for (let item in args) {
       switch (item) {
         case 'serverAddr':
@@ -22,17 +19,16 @@ onBeforeMount(() => {
           break
         case 'connected':
           status.value.connected = args[item]
-          if (args[item]) {
-            connected.value = true
-          } else {
-            connected.value = false
-          }
           break
         case 'mediafolder':
           status.value.mediafolder = args[item]
           break
       }
     }
+  })
+  ipc.on('device:rt', (arr) => {
+    console.log('device:rt')
+    devices.value = arr
   })
   ipc.send('status:get')
   ipc.send('ui:open')
@@ -74,8 +70,8 @@ onBeforeMount(() => {
   background: #eee;
 }
 .online {
-  color: v-bind(connected ? 'green': 'red');
-  border: 1px solid v-bind(connected ? 'green': 'red');
+  color: v-bind(status.connected ? 'green': 'red');
+  border: 1px solid v-bind(status.connected ? 'green': 'red');
   border-radius: 5px;
   padding: 0 1px 0 1px;
   font-size: 10px;

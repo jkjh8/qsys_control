@@ -1,10 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDeviceStore } from 'src/stores/devices.js'
+import { devices } from 'src/composables/useDevices.js'
 import columns from './columns.js'
-
-const { devices } = storeToRefs(useDeviceStore())
 
 function qsysRefresh(id) {
   ipc.send('qsys:refresh', { deviceId: id })
@@ -13,13 +11,7 @@ function qsysRefresh(id) {
 function reloadDevices() {
   ipc.send('socket:devices')
 }
-onMounted(() => {
-  ipc.on('devices:rt', (args) => {
-    devices.value = args
-    console.log('updated devices: ' + args)
-  })
-  ipc.send('devices:list')
-})
+onMounted(() => {})
 </script>
 
 <template>

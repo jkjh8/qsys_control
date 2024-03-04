@@ -1,13 +1,16 @@
 import { BrowserWindow as bw, ipcMain, dialog, shell } from 'electron'
-import { getTcpSocket } from 'src-electron/tcp'
 import { Status } from 'src-electron/defaultVal'
 import logger from 'src-electron/logger'
 import qsysFunc from './qsysFunc'
+import { qsysArr } from '../qsys/devices'
+// import { socketConnect } from '../socket'
 
 export default function () {
   // open ui
   ipcMain.on('ui:open', () => {
-    getTcpSocket(Status.serverPort, Status.serverAddr)
+    console.log('ui: open')
+    // socketConnect('127.0.0.1', 'qsys')
+    rtIPC('device:rt', qsysArr)
   })
   // status rt
   ipcMain.on('status:get', () =>
@@ -76,7 +79,7 @@ export default function () {
 
 function rtIPC(channel, obj) {
   try {
-    BrowserWindow.fromId(1).webContents.send(channel, obj)
+    bw.fromId(1).webContents.send(channel, obj)
   } catch (err) {
     logger.error(
       `IPC return error -- channel ${channel}, value: ${obj} -- ${err}`
@@ -85,7 +88,7 @@ function rtIPC(channel, obj) {
 }
 
 function rtStatus() {
-  BrowserWindow.fromId(1).webContents.send('status', Status)
+  bw.fromId(1).webContents.send('status', Status)
 }
 
 export { rtIPC, rtStatus }

@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
 import net from 'net'
-import { socket } from '../../socket'
 // import { removeQsys } from '..'
 
 export default class Qrc extends EventEmitter {

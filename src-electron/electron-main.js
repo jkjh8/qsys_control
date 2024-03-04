@@ -4,6 +4,7 @@ import os from 'os'
 
 import initIPC from './ipc'
 import { setDefaultValueFormDb } from 'src-electron/defaultVal'
+import { socketConnect } from './socket'
 
 let mainWindow
 
@@ -40,6 +41,7 @@ async function createWindow() {
   initIPC()
   // tcp server open move ipc return function
   // getTcpSocket(2990, '127.0.0.1')
+  socketConnect('127.0.0.1', 'qsys')
 }
 
 app.whenReady().then(createWindow)

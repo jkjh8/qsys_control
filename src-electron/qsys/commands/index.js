@@ -1,4 +1,4 @@
-import { qsys, devices } from '..'
+import { qsyslist } from '../devices'
 import logger from 'src-electron/logger'
 /*
 id
@@ -21,12 +21,12 @@ function getStatus(deviceId) {
 function getPaGainMute(deviceId) {
   const arr = []
 
-  for (let item of devices[devices.findIndex((e) => e.deviceId === deviceId)]
+  for (let item of qsyslist[qsyslist.findIndex((e) => e.deviceId === deviceId)]
     .ZoneStatus) {
     arr.push({ Name: `zone.${item.Zone}.gain` })
     arr.push({ Name: `zone.${item.Zone}.mute` })
   }
-  qsys[deviceId].addCommand({
+  qsyslist[deviceId].addCommand({
     id: 3001,
     method: 'Component.Get',
     params: {
@@ -37,7 +37,7 @@ function getPaGainMute(deviceId) {
 }
 // 2000
 function setPaFeedback(deviceId, value = true) {
-  qsys[deviceId].addCommand({
+  qsyslist[deviceId].addCommand({
     id: 2000,
     method: 'PA.ZoneStatusConfigure',
     params: { Enabled: value }
@@ -46,7 +46,7 @@ function setPaFeedback(deviceId, value = true) {
 
 // 2001
 function getPaConfig(deviceId) {
-  qsys[deviceId].addCommand({
+  qsyslist[deviceId].addCommand({
     id: 2001,
     method: 'PA.GetConfig',
     params: {}
@@ -74,7 +74,7 @@ function messagePlay(deviceId, obj) {
       params.Preamble = obj.Preamble
     }
 
-    qsys[deviceId].addCommand({ id: 2002, method: 'PA.PageSubmit', params })
+    qsyslist[deviceId].addCommand({ id: 2002, method: 'PA.PageSubmit', params })
   } catch (err) {
     logger.error(`qsys id ${deviceId} message page error: ${err}`)
   }
@@ -98,7 +98,7 @@ function livePage(deviceId, obj) {
       params.Preamble = obj.Preamble
     }
 
-    qsys[deviceId].addCommand({ id: 2003, method: 'PA.PageSubmit', params })
+    qsyslist[deviceId].addCommand({ id: 2003, method: 'PA.PageSubmit', params })
   } catch (err) {
     logger.error(`qsys id ${deviceId} live page error ${err}`)
   }
@@ -106,7 +106,7 @@ function livePage(deviceId, obj) {
 // 2008
 function stopPage(deviceId, PageID) {
   try {
-    qsys[deviceId].addCommand({
+    qsyslist[deviceId].addCommand({
       id: 2009,
       method: 'PA.PageStop',
       params: { PageID }
@@ -118,7 +118,7 @@ function stopPage(deviceId, PageID) {
 // 2009
 function cancelPage(deviceId, PageID) {
   try {
-    qsys[deviceId].addCommand({
+    qsyslist[deviceId].addCommand({
       id: 2009,
       method: 'PA.PageCancel',
       params: { PageID }
@@ -131,7 +131,7 @@ function cancelPage(deviceId, PageID) {
 // 3002
 function setChannelMute(deviceId, zone, value) {
   try {
-    qsys[deviceId].addCommand({
+    qsyslist[deviceId].addCommand({
       id: 3002,
       method: 'Component.Set',
       params: {
@@ -148,7 +148,7 @@ function setChannelMute(deviceId, zone, value) {
 // 3003
 function setChannelGain(deviceId, zone, value) {
   try {
-    qsys[deviceId].addCommand({
+    qsyslist[deviceId].addCommand({
       id: 3003,
       method: 'Component.Set',
       params: {

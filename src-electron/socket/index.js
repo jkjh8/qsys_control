@@ -1,7 +1,10 @@
 import { io } from 'socket.io-client'
 import logger from 'src-electron/logger'
 import { rtIPC, rtStatus } from 'src-electron/ipc'
-import { updateDevice, updateDevices } from 'src-electron/qsys'
+import {
+  addlistQsysDevice,
+  addListQsysDevices
+} from 'src-electron/qsys/devices'
 import { Status } from 'src-electron/defaultVal'
 import ioParser from './parser'
 
@@ -16,13 +19,13 @@ async function socketConnect(addr, uid) {
       auth: {
         token: uid
       },
-      extraHeaders: { deviceid: uid, type: 'qsys' },
+      extraHeaders: { type: 'qsys' },
       autoConnect: true
     })
 
     socket.on('connect', () => {
       Status.connected = true
-      rtStatus()
+      // rtStatus()
       // rtIPC('socket:rt', { name: 'online', value: true })
       // socket.emit('getQsysDevices')
       logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
@@ -31,22 +34,25 @@ async function socketConnect(addr, uid) {
     socket.on('disconnect', (reason) => {
       Status.connected = false
       // rtIPC('socket:rt', { name: 'online', value: false })
-      rtStatus()
+      // rtStatus()
       logger.warn(`socket.io disconnected from ${addr} socket -- ${reason}`)
       setTimeout(() => {
         socket.connect()
       }, 5000)
     })
 
-    socket.on('qsysDevices', (args) => {
+    socket.on('qsys:devices', (args) => {
       const arr = JSON.parse(args)
-      updateDevices(arr)
-      rtIPC('socket:rt', { name: 'devices', value: arr })
+      try {
+        addListQsysDevices(arr)
+      } catch (error) {
+        console.log(error)
+      }
     })
 
     socket.on('qsysUpdateDevice', (args) => {
       const obj = JSON.parse(args)
-      updateDevice(obj)
+      addlistQsysDevice(obj)
     })
 
     socket.on('qsys:command', (comm) => {
