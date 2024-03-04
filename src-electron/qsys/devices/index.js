@@ -1,7 +1,7 @@
 import Qrc from '../qrc'
-import { rtIPC } from 'src-electron/ipc'
-import { socket } from 'src-electron/socket'
+import { sendQsysConnect, sendQsysDisconnect } from '../socket'
 import { setPaFeedback } from '../commands'
+import fromQsys from '../fromQsys'
 
 const qsyslist = {}
 let qsysArr = []
@@ -35,22 +35,21 @@ const addlistQsysDevice = (device) => {
   qsyslist[deviceId] = new Qrc(device)
   // callback
   qsyslist[deviceId].on('connect', () => {
-    socket.emit('qsys:connect', JSON.stringify({ deviceId, name, ipaddress }))
+    sendQsysConnect({ deviceId, name, ipaddress })
     // PA 모듈 호출
     setPaFeedback(deviceId)
   })
 
   qsyslist[deviceId].on('disconnect', () => {
-    socket.emit(
-      'qsys:disconnect',
-      JSON.stringify({ deviceId, name, ipaddress })
-    )
+    sendQsysDisconnect({ deviceId, name, ipaddress })
     reconnect(device)
   })
 
-  qsyslist[deviceId].on('data', (arr) => {
+  qsyslist[deviceId].on('data', (data) => {
     // QSYS DATA
     console.log('qsys data = ', arr)
+    // QSYS 데이터 처리
+    fromQsys(deviceId, data)
   })
 
   qsyslist[deviceId].on('error', (error) => {

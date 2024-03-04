@@ -46,13 +46,8 @@ async function socketConnect(addr, uid) {
       try {
         addListQsysDevices(arr)
       } catch (error) {
-        console.log(error)
+        logger.error(error)
       }
-    })
-
-    socket.on('qsysUpdateDevice', (args) => {
-      const obj = JSON.parse(args)
-      addlistQsysDevice(obj)
     })
 
     socket.on('qsys:command', (comm) => {
@@ -60,7 +55,7 @@ async function socketConnect(addr, uid) {
       try {
         ioParser(JSON.parse(comm))
       } catch (error) {
-        console.log(error)
+        logger.error(error)
       }
     })
 
