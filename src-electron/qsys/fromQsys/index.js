@@ -73,6 +73,20 @@ export default function parser(deviceId, data) {
           break
         case '3001':
           // volume and mute
+          const vols = result.Controls
+          const ZoneStatus =
+            qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)]
+              .ZoneStatus
+          for (let val of vols) {
+            const channel = Number(val.Name.replace(/[^0-9]/g, ''))
+            const idx = ZoneStatus.findIndex((e) => e.Zone === channel)
+            if (val.Name.includes('gain')) {
+              ZoneStatus[idx].gain = val.Value
+            }
+            if (val.Name.includes('mute')) {
+              ZoneStatus[idx].mute = val.Value
+            }
+          }
           break
       }
     }
