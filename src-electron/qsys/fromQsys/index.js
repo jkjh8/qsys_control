@@ -1,4 +1,4 @@
-import { qsyslist, qsysArr } from '../devices'
+import { qsysObj, qsysArr } from '../devices'
 import {
   ioSendEngineStatus,
   ioSendZoneStatus,

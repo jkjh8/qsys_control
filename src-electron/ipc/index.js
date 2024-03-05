@@ -3,6 +3,7 @@ import { Status } from 'src-electron/defaultVal'
 import logger from 'src-electron/logger'
 import qsysFunc from './qsysFunc'
 import { qsysArr } from '../qsys/devices'
+import { socket } from '../socket'
 // import { socketConnect } from '../socket'
 
 export default function () {
@@ -16,6 +17,10 @@ export default function () {
   ipcMain.on('status:get', () =>
     bw.fromId(1).webContents.send('status:rt', Status)
   )
+
+  ipcMain.on('socket:devices', () => {
+    socket.emit('device:get')
+  })
 
   // folder functions
   ipcMain.on('folder:set', async () => {

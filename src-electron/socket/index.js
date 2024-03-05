@@ -25,16 +25,11 @@ async function socketConnect(addr, uid) {
 
     socket.on('connect', () => {
       Status.connected = true
-      // rtStatus()
-      // rtIPC('socket:rt', { name: 'online', value: true })
-      // socket.emit('getQsysDevices')
       logger.info(`socket.io connected to ${addr} socket -- ${socket.id}`)
     })
 
     socket.on('disconnect', (reason) => {
       Status.connected = false
-      // rtIPC('socket:rt', { name: 'online', value: false })
-      // rtStatus()
       logger.warn(`socket.io disconnected from ${addr} socket -- ${reason}`)
       setTimeout(() => {
         socket.connect()
@@ -44,6 +39,7 @@ async function socketConnect(addr, uid) {
     socket.on('qsys:devices', (args) => {
       try {
         addListQsysDevices(args)
+        rtIPC('device:rt', args)
       } catch (error) {
         logger.error('qsys:deices', error)
       }

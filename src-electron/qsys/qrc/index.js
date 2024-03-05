@@ -10,8 +10,10 @@ export default class Qrc extends EventEmitter {
     this.ipaddress = obj.ipaddress
     this.client = new net.Socket()
     this.ivConnection = null
+    this.ivReconnect = null
     this.timeout = 60
     this.connected = false
+    this.setDisconnect = false
     // commands
     this.commands = []
     this.ivCommands = null
@@ -25,12 +27,20 @@ export default class Qrc extends EventEmitter {
       this.emit('connect')
       // socket keep alive
       this.setTimeout()
+      if (this.ivReconnect) {
+        clearInterval(this.ivReconnect)
+        this.ivReconnect = null
+      }
     })
 
     this.client.on('close', () => {
       this.connected = false
       clearInterval(this.ivConnection)
+      this.ivConnection = null
       this.client.removeAllListeners()
+      if (!this.setDisconnect) {
+        this.reconnect()
+      }
       this.emit('disconnect')
     })
 
@@ -67,6 +77,7 @@ export default class Qrc extends EventEmitter {
   }
 
   connect() {
+    this.setDisconnect = false
     if (this.connected) {
       return this.emit('error', `qsys ${this.name} is already connected`)
     }
@@ -78,15 +89,37 @@ export default class Qrc extends EventEmitter {
   }
 
   disconnect() {
+    this.setDisconnect = true
     if (this.ivCommands) {
       clearInterval(this.ivCommands)
     }
-    clearInterval(this.ivConnection)
+    if (this.ivConnection) {
+      clearInterval(this.ivConnection)
+    }
+    if (this.ivReconnect) {
+      clearInterval(this.ivReconnect)
+    }
     this.ivCommands = null
     this.ivConnection = null
+    this.ivReconnect = null
+
     if (this.connected) {
       this.client.end()
     }
+  }
+
+  reconnect() {
+    this.ivReconnect = setInterval(() => {
+      try {
+        if (this.connected) {
+          clearInterval(this.ivReconnect)
+        } else {
+          this.connect()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }, 5000)
   }
 
   addCommand(msg) {
