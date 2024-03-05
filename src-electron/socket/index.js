@@ -42,11 +42,10 @@ async function socketConnect(addr, uid) {
     })
 
     socket.on('qsys:devices', (args) => {
-      const arr = JSON.parse(args)
       try {
-        addListQsysDevices(arr)
+        addListQsysDevices(args)
       } catch (error) {
-        logger.error(error)
+        logger.error('qsys:deices', error)
       }
     })
 

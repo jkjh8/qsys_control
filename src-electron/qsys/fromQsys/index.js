@@ -1,5 +1,7 @@
+import { qsyslist, qsysArr } from '../devices'
 import {
   ioSendEngineStatus,
+  ioSendZoneStatus,
   ioSendZoneStatusConfigure,
   ioSendPaConfig,
   ioSendPageMessage,
@@ -7,6 +9,7 @@ import {
   ioSendPageStop,
   ioSendPageCancel
 } from '../socket'
+
 export default function parser(deviceId, data) {
   for (let obj of data) {
     // by method
@@ -17,6 +20,19 @@ export default function parser(deviceId, data) {
           ioSendEngineStatus({ deviceId, EngineStatus: params })
           break
         // PA.ZoneStatus 코딩 필요.
+        case 'PA.ZoneStatus':
+          const ZoneStatus =
+            qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)]
+              .ZoneStatus
+          const idx = ZoneStatus.findIndex((e) => e.Zone === params.Zone)
+          if (idx !== -1) {
+            for (let key in params) {
+              ZoneStatus[idx][key] = params[key]
+            }
+          } else {
+            ZoneStatus.push(params)
+          }
+          break
       }
     }
     // by ID
@@ -61,4 +77,9 @@ export default function parser(deviceId, data) {
       }
     }
   }
+  ioSendZoneStatus({
+    deviceId,
+    ZoneStatus:
+      qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus
+  })
 }
