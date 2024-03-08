@@ -73,7 +73,8 @@ const pageQsysCancel = (deviceId, PageID) => {
 // 3001
 const getQsysGainMute = (deviceId) => {
   const Controls = []
-  const ZoneStatus = qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)]
+  const ZoneStatus =
+    qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus
   for (let item of ZoneStatus) {
     Controls.push({ Name: `zone.${item.Zone}.gain` })
     Controls.push({ Name: `zone.${item.Zone}.mute` })
@@ -85,6 +86,30 @@ const getQsysGainMute = (deviceId) => {
   })
 }
 
+// 3003
+const setQsysGain = (deviceId, zone, value) => {
+  qsysObj[deviceId].addCommand({
+    id: 3003,
+    method: 'Component.Set',
+    params: {
+      Name: 'PA',
+      Controls: [{ Name: `zone.${zone}.gain`, Value: value }]
+    }
+  })
+}
+
+const setQsysMute = (deviceId, zone, value) => {
+  console.log(value)
+  qsysObj[deviceId].addCommand({
+    id: 3004,
+    method: 'Component.Set',
+    params: {
+      Name: 'PA',
+      Controls: [{ Name: `zone.${zone}.mute`, Value: value }]
+    }
+  })
+}
+
 export {
   getQsysStatus,
   setQsysPaFeedback,
@@ -93,5 +118,7 @@ export {
   pageQsysLive,
   pageQsysStop,
   pageQsysCancel,
-  getQsysGainMute
+  getQsysGainMute,
+  setQsysGain,
+  setQsysMute
 }

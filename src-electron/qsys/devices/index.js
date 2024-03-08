@@ -1,9 +1,8 @@
 import Qrc from '../qrc'
 import { sendQsysConnect, sendQsysDisconnect } from '../socket'
-import { setPaFeedback } from '../commands'
+import { setQsysPaFeedback } from '../toQsys'
 import fromQsys from '../fromQsys'
 import logger from '../../logger'
-import { rtIPC } from 'src-electron/ipc'
 
 const qsysObj = {}
 let qsysArr = []
@@ -22,7 +21,8 @@ const addListQsysDevices = (args) => {
       if (args.findIndex((e) => e.deviceId === deviceId) === -1) {
         qsysObj[deviceId].disconnect()
         delete qsysObj[deviceId]
-        console.log('disconnect', deviceId)
+        console.log(qsysObj)
+        logger.warn(`qsys disconnect device -- ${deviceId}`)
       }
     }
   } catch (error) {
@@ -47,28 +47,49 @@ const addlistQsysDevice = (device) => {
       qsysObj[deviceId].connected = true
       sendQsysConnect({ deviceId, name, ipaddress })
       // PA 모듈 호출
-      setPaFeedback(deviceId)
+      setQsysPaFeedback(deviceId)
     })
 
     qsysObj[deviceId].on('disconnect', () => {
       sendQsysDisconnect({ deviceId, name, ipaddress })
+      qsysReconnect(device)
     })
 
     qsysObj[deviceId].on('data', (data) => {
       // QSYS DATA
-      console.log('qsys data = ', data)
+      console.log('qsys data = ', deviceId, ipaddress, data)
       // QSYS 데이터 처리
-      fromQsys(deviceId, data)
+
+      if (Object.keys(qsysObj).includes(deviceId)) {
+        try {
+          fromQsys(deviceId, data)
+        } catch (error) {
+          logger.error(`from qsys error -- ${error}`)
+        }
+      }
     })
 
+    qsysObj[deviceId].on('debug', (doc) => {
+      logger.warn(doc)
+    })
     qsysObj[deviceId].on('error', (error) => {
-      logger.error(`qsys error ${deviceId} ${ipaddress} ${error}`)
+      logger.error(error)
     })
     // 연결
     qsysObj[deviceId].connect()
   } catch (error) {
-    logger.error(error)
+    logger.error('addlistQsysDecice', error)
   }
+}
+
+const qsysReconnect = (device) => {
+  setTimeout(() => {
+    const idx =
+      qsysArr[qsysArr.findIndex((e) => e.deviceId === device.deviceId)]
+    if (idx && idx !== -1) {
+      addlistQsysDevice(device)
+    }
+  }, 5000)
 }
 
 export { qsysObj, qsysArr, addListQsysDevices, addlistQsysDevice }

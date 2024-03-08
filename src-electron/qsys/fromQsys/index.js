@@ -1,3 +1,4 @@
+import logger from 'src-electron/logger'
 import { qsysObj, qsysArr } from '../devices'
 import {
   ioSendEngineStatus,
@@ -9,9 +10,14 @@ import {
   ioSendPageStop,
   ioSendPageCancel
 } from '../socket'
+import { getQsysGainMute } from '../toQsys'
 
 export default function parser(deviceId, data) {
   for (let obj of data) {
+    // error
+    if (Object.keys(obj).includes('error')) {
+      return logger.error(`from Qsys error -- ${JSON.stringify(obj.error)}`)
+    }
     // by method
     if (Object.keys(obj).includes('method')) {
       const { method, params } = obj
@@ -50,30 +56,31 @@ export default function parser(deviceId, data) {
     if (Object.keys(obj).includes('id')) {
       const { id, result } = obj
       switch (id) {
-        case '1000':
+        case 1000:
           ioSendEngineStatus({ deviceId, EngineStatus: result })
           break
-        case '2000':
+        case 2000:
           ioSendZoneStatusConfigure({ deviceId, ZoneStatusConfigure: result })
           break
-        case '2001':
+        case 2001:
           ioSendPaConfig({ deviceId, PaConfig: result })
           break
-        case '2002':
+        case 2002:
           ioSendPageMessage({ deviceId, ...result })
           break
-        case '2003':
+        case 2003:
           ioSendPageLive({ deviceId, ...result })
           break
-        case '2008':
+        case 2008:
           ioSendPageStop({ deviceId })
           break
-        case '2009':
+        case 2009:
           ioSendPageCancel({ deviceId })
           break
-        case '3001':
+        case 3001:
           // volume and mute
           const vols = result.Controls
+          console.log(vols)
           const ZoneStatus =
             qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)]
               .ZoneStatus
@@ -87,6 +94,10 @@ export default function parser(deviceId, data) {
               ZoneStatus[idx].mute = val.Value
             }
           }
+          break
+        case 3003:
+        case 3004:
+          getQsysGainMute(deviceId)
           break
       }
     }

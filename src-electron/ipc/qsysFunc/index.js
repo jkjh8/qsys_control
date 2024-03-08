@@ -2,20 +2,20 @@ import { ipcMain } from 'electron'
 import logger from 'src-electron/logger'
 
 import {
-  getPaConfig,
-  getStatus,
-  setPaFeedback,
-  getPaGainMute
-} from 'src-electron/qsys/commands'
+  getQsysStatus,
+  getQsysGainMute,
+  setQsysPaFeedback
+} from 'src-electron/qsys/toQsys'
 
 export default function () {
   ipcMain.on('qsys:refresh', (e, device) => {
     const { deviceId } = device
     try {
-      console.log(deviceId)
-      getPaGainMute(deviceId)
-      getStatus(deviceId)
-      setPaFeedback(deviceId)
+      logger.warn(`qsys refresh -- ${deviceId}`)
+      // getQsysStatus(deviceId)
+      getQsysGainMute(deviceId)
+      // setQsysPaFeedback(deviceId)
+
       // getPaConfig(deviceId)
     } catch (error) {
       console.log(error)
