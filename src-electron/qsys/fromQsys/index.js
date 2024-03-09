@@ -10,12 +10,21 @@ import {
   ioSendPageStop,
   ioSendPageCancel
 } from '../socket'
+
 import { getQsysGainMute } from '../toQsys'
 
 export default function parser(deviceId, data) {
   for (let obj of data) {
     // error
     if (Object.keys(obj).includes('error')) {
+      // id별 에러 처리 추가 요망
+      const { id } = obj
+      switch (id) {
+        case 3003:
+        case 3004:
+          getQsysGainMute(deviceId)
+          break
+      }
       return logger.error(`from Qsys error -- ${JSON.stringify(obj.error)}`)
     }
     // by method
@@ -97,7 +106,7 @@ export default function parser(deviceId, data) {
           break
         case 3003:
         case 3004:
-          getQsysGainMute(deviceId)
+          // getQsysGainMute(deviceId)
           break
       }
     }

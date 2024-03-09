@@ -33,6 +33,7 @@ const ioSendPageStop = (args) => {
 const ioSendPageCancel = (args) => {
   socket.emit('qsys:page:cancel', { ...args })
 }
+
 export {
   sendSocketData,
   sendQsysConnect,

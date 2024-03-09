@@ -151,7 +151,6 @@ export default class Qrc extends EventEmitter {
           if (this.timeout < 5) {
             this.addCommand({ method: 'NoOp', params: {} })
             this.emit('debug', `qsys ${this.name} -- noOp`)
-            console.log('noop')
           }
           // clear interval at disconnected
           if (!this.connected) {

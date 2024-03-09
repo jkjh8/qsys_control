@@ -7,6 +7,7 @@ import {
 } from 'src-electron/qsys/devices'
 import { Status } from 'src-electron/defaultVal'
 import ioParser from './parser'
+import { setQsysGain, setQsysMute } from '../qsys/toQsys'
 
 let socket
 
@@ -34,6 +35,16 @@ async function socketConnect(addr, uid) {
       setTimeout(() => {
         socket.connect()
       }, 5000)
+    })
+
+    socket.on('qsys:volume', (args) => {
+      const { deviceId, zone, value } = args
+      setQsysGain(deviceId, zone, value)
+    })
+
+    socket.on('qsys:mute', (args) => {
+      const { deviceId, zone, value } = args
+      setQsysMute(deviceId, zone, value)
     })
 
     socket.on('qsys:devices', (args) => {

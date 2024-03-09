@@ -88,26 +88,39 @@ const getQsysGainMute = (deviceId) => {
 
 // 3003
 const setQsysGain = (deviceId, zone, value) => {
-  qsysObj[deviceId].addCommand({
-    id: 3003,
-    method: 'Component.Set',
-    params: {
-      Name: 'PA',
-      Controls: [{ Name: `zone.${zone}.gain`, Value: value }]
-    }
-  })
+  qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus[
+    zone - 1
+  ].gain = value
+  try {
+    qsysObj[deviceId].addCommand({
+      id: 3003,
+      method: 'Component.Set',
+      params: {
+        Name: 'PA',
+        Controls: [{ Name: `zone.${zone}.gain`, Value: value }]
+      }
+    })
+  } catch (error) {
+    logger.error(`qsys id 3003 error -- ${error}`)
+  }
 }
 
 const setQsysMute = (deviceId, zone, value) => {
-  console.log(value)
-  qsysObj[deviceId].addCommand({
-    id: 3004,
-    method: 'Component.Set',
-    params: {
-      Name: 'PA',
-      Controls: [{ Name: `zone.${zone}.mute`, Value: value }]
-    }
-  })
+  qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus[
+    zone - 1
+  ].mute = value
+  try {
+    qsysObj[deviceId].addCommand({
+      id: 3004,
+      method: 'Component.Set',
+      params: {
+        Name: 'PA',
+        Controls: [{ Name: `zone.${zone}.mute`, Value: value }]
+      }
+    })
+  } catch (error) {
+    logger.error(`qsys id 3004 error -- ${error}`)
+  }
 }
 
 export {
