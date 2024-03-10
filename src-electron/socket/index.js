@@ -33,18 +33,30 @@ async function socketConnect(addr, uid) {
       Status.connected = false
       logger.warn(`socket.io disconnected from ${addr} socket -- ${reason}`)
       setTimeout(() => {
-        socket.connect()
+        try {
+          socket.connect()
+        } catch (error) {
+          logger.errror(`socket.io reconnect error: ${error}`)
+        }
       }, 5000)
     })
 
     socket.on('qsys:volume', (args) => {
-      const { deviceId, zone, value } = args
-      setQsysGain(deviceId, zone, value)
+      try {
+        const { deviceId, zone, value } = args
+        setQsysGain(deviceId, zone, value)
+      } catch (error) {
+        logger.error(`qsys:volume -- ${error}`)
+      }
     })
 
     socket.on('qsys:mute', (args) => {
-      const { deviceId, zone, value } = args
-      setQsysMute(deviceId, zone, value)
+      try {
+        const { deviceId, zone, value } = args
+        setQsysMute(deviceId, zone, value)
+      } catch (error) {
+        logger.error(`qsys:mute -- ${error}`)
+      }
     })
 
     socket.on('qsys:devices', (args) => {
@@ -52,7 +64,7 @@ async function socketConnect(addr, uid) {
         addListQsysDevices(args)
         rtIPC('device:rt', args)
       } catch (error) {
-        logger.error('qsys:deices', error)
+        logger.error(`qsys:devices -- ${error}`)
       }
     })
 
@@ -61,27 +73,27 @@ async function socketConnect(addr, uid) {
       try {
         ioParser(JSON.parse(comm))
       } catch (error) {
-        logger.error(error)
+        logger.error(`io paser error -- ${error}`)
       }
     })
 
-    socket.on('qsys:data', async (data) => {
-      try {
-        const obj = JSON.parse(data)
-        switch (obj.key) {
-          case 'connect':
-            rtIPC('socket:rt', { name: 'devices', value: obj.value })
-            // addQsys(obj.value)
-            break
-          case 'devices':
-            rtIPC('socket:rt', { name: 'devices', value: obj.value })
-            // addQsys(obj.value)
-            break
-        }
-      } catch (err) {
-        logger.error(`socket.io data error -- ${err}`)
-      }
-    })
+    // socket.on('qsys:data', async (data) => {
+    //   try {
+    //     const obj = JSON.parse(data)
+    //     switch (obj.key) {
+    //       case 'connect':
+    //         rtIPC('socket:rt', { name: 'devices', value: obj.value })
+    //         // addQsys(obj.value)
+    //         break
+    //       case 'devices':
+    //         rtIPC('socket:rt', { name: 'devices', value: obj.value })
+    //         // addQsys(obj.value)
+    //         break
+    //     }
+    //   } catch (err) {
+    //     logger.error(`socket.io data error -- ${err}`)
+    //   }
+    // })
     logger.info(`socket.io start on -- ${addr} - ${uid}`)
   } catch (err) {
     logger.error(`socket connection error -- ${err}`)

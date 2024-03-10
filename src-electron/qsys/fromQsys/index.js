@@ -106,7 +106,6 @@ export default function parser(deviceId, data) {
           break
         case 3003:
         case 3004:
-          // getQsysGainMute(deviceId)
           break
       }
     }

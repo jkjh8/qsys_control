@@ -2,96 +2,132 @@ import { qsysObj, qsysArr } from '../devices'
 
 // 1000
 const getQsysStatus = (deviceId) => {
-  qsysObj[deviceId].addCommand({ id: 1000, method: 'StatusGet', params: 0 })
+  try {
+    qsysObj[deviceId].addCommand({ id: 1000, method: 'StatusGet', params: 0 })
+  } catch (error) {
+    logger.error(`get qsys status -- ${error}`)
+  }
 }
 
 // 2000
 const setQsysPaFeedback = (deviceId, value = true) => {
-  qsysObj[deviceId].addCommand({
-    id: 2000,
-    method: 'PA.ZoneStatusConfigure',
-    params: { Enabled: value }
-  })
+  try {
+    qsysObj[deviceId].addCommand({
+      id: 2000,
+      method: 'PA.ZoneStatusConfigure',
+      params: { Enabled: value }
+    })
+  } catch (error) {
+    logger.error(`set qsys pa feedback -- ${error}`)
+  }
 }
 
 // 2001
 const getQsysPaConfig = (deviceId) => {
-  qsysObj[deviceId].addCommand({ id: 2001, method: 'PA.GetConfig', params: {} })
+  try {
+    qsysObj[deviceId].addCommand({
+      id: 2001,
+      method: 'PA.GetConfig',
+      params: {}
+    })
+  } catch (error) {
+    logger.error(`get qsys pa config -- ${error}`)
+  }
 }
 
 // 2002
 const pageQsysMessage = (deviceId, obj) => {
-  const params = {
-    Mode: 'message',
-    Zone: obj.Zones,
-    Priority: obj.Priority,
-    Message: obj.Message,
-    MessageDelete: obj.MessageDelete ? obj.MessageDelete : false,
-    QueueTimeout: obj.QueueTimeout ? obj.QueueTimeout : 0,
-    CancelDelay: obj.CancelDelay ? obj.CancelDelay : 0
+  try {
+    const params = {
+      Mode: 'message',
+      Zone: obj.Zones,
+      Priority: obj.Priority,
+      Message: obj.Message,
+      MessageDelete: obj.MessageDelete ? obj.MessageDelete : false,
+      QueueTimeout: obj.QueueTimeout ? obj.QueueTimeout : 0,
+      CancelDelay: obj.CancelDelay ? obj.CancelDelay : 0
+    }
+    if (obj.Preamble) {
+      params.Preamble = obj.Preamble
+    }
+    qsysObj[deviceId].addCommand({ id: 2002, method: 'PA.PageSubmit', params })
+  } catch (error) {
+    logger.error(`page qsys message -- ${error}`)
   }
-  if (obj.Preamble) {
-    params.Preamble = obj.Preamble
-  }
-  qsysObj[deviceId].addCommand({ id: 2002, method: 'PA.PageSubmit', params })
 }
 
 // 2003
 const pageQsysLive = (deviceId, obj) => {
-  const params = {
-    Zones: obj.Zones,
-    MaxPageTime: obj.MaxPageTime ? obj.MaxPageTime : 240,
-    Mode: 'live',
-    Station: 1,
-    Priority: obj.Priority ? obj.Priority : 3,
-    Start: true
+  try {
+    const params = {
+      Zones: obj.Zones,
+      MaxPageTime: obj.MaxPageTime ? obj.MaxPageTime : 240,
+      Mode: 'live',
+      Station: 1,
+      Priority: obj.Priority ? obj.Priority : 3,
+      Start: true
+    }
+    if (obj.Preamble) {
+      params.Preamble = obj.Preamble
+    }
+    qsysObj[deviceId].addCommand({ id: 2003, method: 'PA.PageSubmit', params })
+  } catch (error) {
+    logger.error(`page qsys live -- ${error}`)
   }
-  if (obj.Preamble) {
-    params.Preamble = obj.Preamble
-  }
-  qsysObj[deviceId].addCommand({ id: 2003, method: 'PA.PageSubmit', params })
 }
 
 // 2008
 const pageQsysStop = (deviceId, PageID) => {
-  qsysObj[deviceId].addCommand({
-    id: 2008,
-    method: 'PA.PageStop',
-    params: { PageID }
-  })
+  try {
+    qsysObj[deviceId].addCommand({
+      id: 2008,
+      method: 'PA.PageStop',
+      params: { PageID }
+    })
+  } catch (error) {
+    logger.error(`page stop -- ${error}`)
+  }
 }
 
 // 2008
 const pageQsysCancel = (deviceId, PageID) => {
-  qsysObj[deviceId].addCommand({
-    id: 2008,
-    method: 'PA.PageCancel',
-    params: { PageID }
-  })
+  try {
+    qsysObj[deviceId].addCommand({
+      id: 2008,
+      method: 'PA.PageCancel',
+      params: { PageID }
+    })
+  } catch (error) {
+    logger.error(`page cancel -- ${error}`)
+  }
 }
 
 // 3001
 const getQsysGainMute = (deviceId) => {
-  const Controls = []
-  const ZoneStatus =
-    qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus
-  for (let item of ZoneStatus) {
-    Controls.push({ Name: `zone.${item.Zone}.gain` })
-    Controls.push({ Name: `zone.${item.Zone}.mute` })
+  try {
+    const Controls = []
+    const ZoneStatus =
+      qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus
+    for (let item of ZoneStatus) {
+      Controls.push({ Name: `zone.${item.Zone}.gain` })
+      Controls.push({ Name: `zone.${item.Zone}.mute` })
+    }
+    qsysObj[deviceId].addCommand({
+      id: 3001,
+      method: 'Component.Get',
+      params: { Name: 'PA', Controls }
+    })
+  } catch (error) {
+    logger.error(`get qsys gain mute -- ${error}`)
   }
-  qsysObj[deviceId].addCommand({
-    id: 3001,
-    method: 'Component.Get',
-    params: { Name: 'PA', Controls }
-  })
 }
 
 // 3003
 const setQsysGain = (deviceId, zone, value) => {
-  qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus[
-    zone - 1
-  ].gain = value
   try {
+    qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus[
+      zone - 1
+    ].gain = value
     qsysObj[deviceId].addCommand({
       id: 3003,
       method: 'Component.Set',
@@ -101,15 +137,15 @@ const setQsysGain = (deviceId, zone, value) => {
       }
     })
   } catch (error) {
-    logger.error(`qsys id 3003 error -- ${error}`)
+    logger.error(`set qsys gain -- ${error}`)
   }
 }
 
 const setQsysMute = (deviceId, zone, value) => {
-  qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus[
-    zone - 1
-  ].mute = value
   try {
+    qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus[
+      zone - 1
+    ].mute = value
     qsysObj[deviceId].addCommand({
       id: 3004,
       method: 'Component.Set',
@@ -119,7 +155,7 @@ const setQsysMute = (deviceId, zone, value) => {
       }
     })
   } catch (error) {
-    logger.error(`qsys id 3004 error -- ${error}`)
+    logger.error(`set qsys mute -- ${error}`)
   }
 }
 
