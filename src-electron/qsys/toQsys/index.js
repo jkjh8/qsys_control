@@ -159,6 +159,27 @@ const setQsysMute = (deviceId, zone, value) => {
   }
 }
 
+const fnSetTransmitter = (deviceId) => {
+  const zones =
+    qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)].ZoneStatus
+  for (let zone of zones) {
+    console.log('update zone', zone)
+    if (zone.destination && zone.destination.ipaddress) {
+      qsysObj[deviceId].addCommand({
+        id: 4001,
+        method: 'Component.Set',
+        params: {
+          Name: `MS-TX-${zone.Zone}`,
+          Controls: [
+            { Name: 'host', Value: zone.destination.ipaddress },
+            { Name: 'port', Value: 4444 }
+          ]
+        }
+      })
+    }
+  }
+}
+
 export {
   getQsysStatus,
   setQsysPaFeedback,
@@ -169,5 +190,6 @@ export {
   pageQsysCancel,
   getQsysGainMute,
   setQsysGain,
-  setQsysMute
+  setQsysMute,
+  fnSetTransmitter
 }

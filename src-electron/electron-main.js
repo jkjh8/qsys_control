@@ -3,12 +3,15 @@ import path from 'path'
 import os from 'os'
 
 import initIPC from './ipc'
-import { setDefaultValueFormDb } from 'src-electron/defaultVal'
+import { Status, setDefaultValueFormDb } from 'src-electron/defaultVal'
 import { socketConnect } from './socket'
 
 let mainWindow
 
 async function createWindow() {
+  // start IPC
+  initIPC()
+  // update status from db
   await setDefaultValueFormDb()
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
@@ -37,11 +40,10 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
-  // start IPC
-  initIPC()
+
   // tcp server open move ipc return function
   // getTcpSocket(2990, '127.0.0.1')
-  socketConnect('127.0.0.1', 'qsys')
+  socketConnect(Status.serverAddr, 'qsys')
 }
 
 app.whenReady().then(createWindow)

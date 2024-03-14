@@ -3,15 +3,7 @@ import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import DialogEdit from 'src/components/dialog/dialogEdit.vue'
 
-import { storeToRefs } from 'pinia'
-import { useStatusStore } from '/src/stores/status.js'
-
-const { status } = storeToRefs(useStatusStore())
-
-// props
-// const props = defineProps({
-//   address: String
-// })
+import { status } from 'src/composables/useStatus.js'
 
 const $q = useQuasar()
 

@@ -69,7 +69,14 @@ export default function parser(deviceId, data) {
           ioSendEngineStatus({ deviceId, EngineStatus: result })
           break
         case 2000:
-          ioSendZoneStatusConfigure({ deviceId, ZoneStatusConfigure: result })
+          ioSendZoneStatusConfigure({
+            deviceId,
+            ZoneStatusConfigure: result,
+            channel: data.length - 1,
+            ZoneStatus:
+              qsysArr[qsysArr.findIndex((e) => e.deviceId === deviceId)]
+                .ZoneStatus
+          })
           break
         case 2001:
           ioSendPaConfig({ deviceId, PaConfig: result })

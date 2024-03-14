@@ -6,10 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import DialogConfirm from 'src/components/dialog/dialogConfirm.vue'
 
 // store
-import { storeToRefs } from 'pinia'
-import { useStatusStore } from 'src/stores/status.js'
-const { status } = storeToRefs(useStatusStore())
-
+import { status } from 'src/composables/useStatus.js'
 const $q = useQuasar()
 
 function openDialog() {

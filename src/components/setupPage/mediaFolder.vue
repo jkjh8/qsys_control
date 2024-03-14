@@ -2,9 +2,7 @@
 import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 // store
-import { storeToRefs } from 'pinia'
-import { useStatusStore } from 'src/stores/status'
-const { status } = storeToRefs(useStatusStore())
+import { status } from 'src/composables/useStatus.js'
 
 const $q = useQuasar()
 

@@ -8,8 +8,10 @@ import { devices } from '/src/composables/useDevices.js'
 
 onBeforeMount(() => {
   ipc.on('status:rt', (args) => {
-    console.log('status:rt')
+    console.log('status:rt', args)
+
     for (let item in args) {
+      console.log(item)
       switch (item) {
         case 'serverAddr':
           status.value.serverAddr = args[item]

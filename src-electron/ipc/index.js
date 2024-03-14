@@ -1,9 +1,11 @@
 import { BrowserWindow as bw, ipcMain, dialog, shell } from 'electron'
+import db from 'src-electron/db'
 import { Status } from 'src-electron/defaultVal'
 import logger from 'src-electron/logger'
 import qsysFunc from './qsysFunc'
 import { qsysArr } from '../qsys/devices'
 import { socket } from '../socket'
+import { fnSetTransmitter } from 'src-electron/qsys/toQsys'
 // import { socketConnect } from '../socket'
 
 export default function () {
@@ -12,6 +14,8 @@ export default function () {
     console.log('ui: open')
     // socketConnect('127.0.0.1', 'qsys')
     rtIPC('device:rt', qsysArr)
+    rtIPC('status:rt', Status)
+    fnSetTransmitter('J06bo1JheoIM')
   })
   // status rt
   ipcMain.on('status:get', () =>
