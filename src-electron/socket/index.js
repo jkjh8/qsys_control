@@ -11,14 +11,15 @@ import {
   setQsysGain,
   setQsysMute,
   fnSetTransmitters,
-  fnSetTransmitter
+  fnSetTransmitter,
+  fnCancelAll
 } from '../qsys/toQsys'
 
 let socket
 
 async function socketConnect(addr, uid) {
   try {
-    socket = io(`http://${addr}`, {
+    socket = io(`http://${addr}/bridge`, {
       transports: ['websocket'],
       rejectUnauthorized: false,
       withCredentials: true,
@@ -87,6 +88,15 @@ async function socketConnect(addr, uid) {
         setQsysMute(deviceId, zone, value)
       } catch (error) {
         logger.error(`qsys:mute -- ${error}`)
+      }
+    })
+
+    socket.on('qsys:cancelAll', (args) => {
+      try {
+        const { deviceId } = args
+        fnCancelAll(deviceId)
+      } catch (error) {
+        logger.error(`qsys:cancelAll -- ${error}`)
       }
     })
 

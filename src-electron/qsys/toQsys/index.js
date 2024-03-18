@@ -1,4 +1,5 @@
 import { qsysObj, qsysArr } from '../devices'
+import logger from 'src-electron/logger'
 
 // 1000
 const getQsysStatus = (deviceId) => {
@@ -188,6 +189,22 @@ const fnSetTransmitter = (args) => {
   })
 }
 
+const fnCancelAll = (deviceId) => {
+  console.log(deviceId)
+  try {
+    qsysObj[deviceId].addCommand({
+      id: 2010,
+      method: 'Component.Set',
+      params: {
+        Name: 'PA',
+        Controls: [{ Name: 'cancel.all.commands', Value: true }]
+      }
+    })
+  } catch (error) {
+    logger.error(error)
+  }
+}
+
 export {
   getQsysStatus,
   setQsysPaFeedback,
@@ -200,5 +217,6 @@ export {
   setQsysGain,
   setQsysMute,
   fnSetTransmitters,
-  fnSetTransmitter
+  fnSetTransmitter,
+  fnCancelAll
 }
