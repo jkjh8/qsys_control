@@ -5,7 +5,6 @@ import logger from 'src-electron/logger'
 import qsysFunc from './qsysFunc'
 import { qsysArr } from '../qsys/devices'
 import { socket } from '../socket'
-import { fnSetTransmitter } from 'src-electron/qsys/toQsys'
 // import { socketConnect } from '../socket'
 
 export default function () {
@@ -15,7 +14,7 @@ export default function () {
     // socketConnect('127.0.0.1', 'qsys')
     rtIPC('device:rt', qsysArr)
     rtIPC('status:rt', Status)
-    fnSetTransmitter('J06bo1JheoIM')
+    // fnSetTransmitter('J06bo1JheoIM')
   })
   // status rt
   ipcMain.on('status:get', () =>

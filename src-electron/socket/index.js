@@ -7,7 +7,12 @@ import {
 } from 'src-electron/qsys/devices'
 import { Status } from 'src-electron/defaultVal'
 import ioParser from './parser'
-import { setQsysGain, setQsysMute } from '../qsys/toQsys'
+import {
+  setQsysGain,
+  setQsysMute,
+  fnSetTransmitters,
+  fnSetTransmitter
+} from '../qsys/toQsys'
 
 let socket
 
@@ -41,6 +46,32 @@ async function socketConnect(addr, uid) {
       }, 5000)
     })
 
+    socket.on('qsys:devices', (args) => {
+      try {
+        addListQsysDevices(args)
+        rtIPC('device:rt', args)
+        console.log('update devices')
+      } catch (error) {
+        logger.error(`qsys:devices -- ${error}`)
+      }
+    })
+
+    socket.on('qsys:zone', (args) => {
+      try {
+        fnSetTransmitter(args)
+      } catch (error) {
+        logger.error(`qsys:zone -- ${error}`)
+      }
+    })
+
+    socket.on('qsys:refreshAll', (args) => {
+      try {
+        fnSetTransmitters(args.deviceId)
+      } catch (error) {
+        logger.error(`qsys:refreshAll -- ${error}`)
+      }
+    })
+
     socket.on('qsys:volume', (args) => {
       try {
         const { deviceId, zone, value } = args
@@ -56,15 +87,6 @@ async function socketConnect(addr, uid) {
         setQsysMute(deviceId, zone, value)
       } catch (error) {
         logger.error(`qsys:mute -- ${error}`)
-      }
-    })
-
-    socket.on('qsys:devices', (args) => {
-      try {
-        addListQsysDevices(args)
-        rtIPC('device:rt', args)
-      } catch (error) {
-        logger.error(`qsys:devices -- ${error}`)
       }
     })
 
